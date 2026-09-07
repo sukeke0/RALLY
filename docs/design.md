@@ -6,13 +6,13 @@ MatchにはschemaVersion / matchId / createdAt / updatedAt / matchType / players
 GameにはgameNumber / initialServingTeam / initialServer / initialReceiver / initialCourtState / initialTeamASide / rallyHistory / endChanges / finalScore / winnerを保持します。
 RallyにはrallyNumber / winner / scoreAfter / serverBefore / receiverBefore / courtStateBefore / teamASideBefore / timestampを保持します。
 
-Ruleはtarget / winBy / cap / gamesToWin / interval { at, seconds, betweenGamesSeconds } / ends { betweenGames, decidingGameAt }に分離しています。途中でルールを変更しません。
+Ruleはtarget / winBy / cap / gamesToWin / interval { at, seconds, betweenGamesSeconds } / ends { betweenGames, decidingGameAt }に分離しています。作成後の設定変更は、ラリーの勝者・時刻と手動コートチェンジを順に再生して配置を再計算します。既存のゲーム進行と矛盾する変更は適用しません。
 
 IndexedDBの`matches`ストアはmatchIdが主キー。`meta`ストアのactiveキーにはmatchIdを保持します。試合と再開情報を同じトランザクションで保存し、トランザクション完了後に保存済みと表示します。
 
 ## 状態遷移
 
-設定 → 試合中 → インターバル → 試合中 → ゲーム終了 → 次ゲーム設定 → 試合中、必要ゲーム数に到達すると試合終了です。
+設定 → 試合中 → ゲーム終了 → 次ゲーム設定 → 試合中、必要ゲーム数に到達すると試合終了です。
 休憩タイマーや休憩による入力停止はありません。旧データのpauseとflippedは読み込み時に除外します。Ruleのintervalは旧保存データ・JSONとの互換性のため保持し、新規試合では無効値を使用します。
 
 ## サービス順
@@ -62,4 +62,10 @@ B │   │ 1 │   │ …
 ## 名前の編集
 
 設定からチーム名と選手名を変更できます。選手ID・得点履歴・サービス順は変わりません。Redoに保持された試合にも同じ名前を反映し、得点の取り消し・やり直しで名前が古い表示に戻らないようにしています。teamNamesがない旧データはTeam A / Team Bを表示し、そのまま再開できます。
+
+試合設定の変更はdomain/revise.tsでラリーの勝者・時刻を再生し、初期配置とサービス順・自動交替を再計算します。試合IDと記録済みの得点は維持します。ゲーム遷移や途中終了と矛盾する変更は保存しません。設定変更を保存すると、保留していたRedoはクリアします。
+
+Game.endingは任意の途中終了記録（reason / scope / winner / timestamp）です。得点を追加せずfinalScoreを確定し、勝者なしの引き分けも記録します。GameState.finishedで入力を停止します。試合全体の終了は指定した結果で確定し、ゲームだけの終了は通常のゲーム勝利数に加算します。引き分けでは加算せず、次ゲームの最初のサーブ側を選択します。最大ゲーム数に到達した場合は獲得ゲーム数で試合結果を確定し、同数なら引き分けです。
+
+途中終了後のUndoは得点を減らさず終了記録だけを削除します。再読み込み後にも使用でき、次ゲームの0–0から戻る場合にも同様です。JSON読み込みは途中終了をエンジンで再実行して結果との整合性を検証します。
 

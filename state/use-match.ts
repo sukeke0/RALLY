@@ -1,5 +1,5 @@
 import { useEffect,useRef,useState } from 'react';
-import type { Match,MatchSetup,PlayerId,Team } from '../domain/model';
+import type { GameEnding,Match,MatchSetup,PlayerId,Team } from '../domain/model';
 import { createMatch,currentState } from '../domain/engine';
 import { MatchRepository,type Preferences } from '../persistence/repository';
 import { MatchStore } from './match-store';
@@ -40,7 +40,9 @@ export function useMatch(){
  async function open(saved:Match){await guarded(async()=>{if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');store.current=new MatchStore(saved);await persist(saved,{matchId:saved.matchId});});}
  async function retry(){await guarded(async()=>{if(store.current)await persist(store.current.match,prefsRef.current);else{const result=await repo.load();if(result){store.current=new MatchStore(result.match);setMatch(result.match);prefsRef.current=result.prefs;setPrefs(result.prefs);}setSaveStatus('saved');setError('');}});}
  async function rename(names:ParticipantNames){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');await persist(store.current.rename(names,new Date().toISOString()),prefsRef.current);});}
- return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,open,retry,rename,
+ async function revise(setup:MatchSetup){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');if(saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');await persist(store.current.revise(setup,new Date().toISOString()),prefsRef.current);});}
+ async function finish(ending:Omit<GameEnding,'timestamp'>){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');if(saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');await persist(store.current.finish({...ending,timestamp:new Date().toISOString()}),prefsRef.current);});}
+ return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,open,retry,rename,revise,finish,
   canUndo:store.current?.canUndo??false,canRedo:store.current?.canRedo??false,
   read:()=>store.current?{matchId:store.current.match.matchId,game:store.current.match.games.length,...currentState(store.current.match),status:store.current.match.status}:null};
 }

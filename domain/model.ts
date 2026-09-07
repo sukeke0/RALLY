@@ -4,6 +4,12 @@ export type Side = 'left' | 'right';
 export type MatchType = 'singles' | 'doubles';
 export type Score = Record<Team, number>;
 export type CourtState = Record<Team, Record<Side, PlayerId>>;
+export interface GameEnding {
+  reason: 'retirement' | 'time-limit' | 'other';
+  scope: 'game' | 'match';
+  winner: Team | null;
+  timestamp: string;
+}
 export interface Rule {
   id: string;
   name: string;
@@ -16,6 +22,7 @@ export interface Rule {
   ends: { betweenGames: boolean; decidingGameAt: number | null };
 }
 export interface GameState {
+  finished: boolean;
   score: Score;
   servingTeam: Team;
   server: PlayerId;
@@ -38,6 +45,7 @@ export interface Rally {
   timestamp: string;
 }
 export interface Game {
+  ending?: GameEnding;
   gameNumber: number;
   initialServingTeam: Team;
   initialServer: PlayerId;

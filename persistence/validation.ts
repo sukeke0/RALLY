@@ -1,5 +1,5 @@
 import type { Match, PlayerId, Team } from '../domain/model.ts';
-import { createMatch, currentState, nextGame, scorePoint, changeEnds } from '../domain/engine.ts';
+import { createMatch, currentState, nextGame, scorePoint, changeEnds, endGame } from '../domain/engine.ts';
 import { validateRule } from '../domain/rules.ts';
 const ids=['A1','A2','B1','B2'];
 const fail=():never=>{throw new Error('試合データの形式または得点履歴が正しくありません。');};
@@ -32,6 +32,10 @@ export function validateMatch(value: unknown): Match {
     built=scorePoint(built,r.winner as Team,r.timestamp);
     if(!same(r.scoreAfter,currentState(built).score))fail();
     ends(j+1);
+   }
+   if(g.ending!==undefined){
+    if(!g.ending || typeof g.ending!=='object' || !date(g.ending.timestamp) || Object.keys(g.ending).sort().join(',')!=='reason,scope,timestamp,winner')fail();
+    built=endGame(built,g.ending);
    }
    if(!same(built.games[i].finalScore,g.finalScore)||built.games[i].winner!==g.winner)fail();
   }
