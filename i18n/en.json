@@ -210,5 +210,13 @@
   "ファーストサーバー": "First server",
   "ファーストレシーバー": "First receiver",
   "セット終了": "Game over",
-  "次のセットへ": "Next game"
+  "次のセットへ": "Next game",
+  "削除": "Delete",
+  "削除の確認": "Confirm deletion",
+  "この試合を削除しますか？得点履歴も削除され、元に戻せません。": "Delete this match and its rally history? This cannot be undone.",
+  "キャンセル": "Cancel",
+  "この試合を削除": "Delete this match",
+  "削除中…": "Deleting…",
+  "試合を削除しました。": "Match deleted.",
+  "試合を削除できませんでした。もう一度お試しください。": "Could not delete the match. Please try again."
 }

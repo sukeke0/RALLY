@@ -42,7 +42,13 @@ export function useMatch(){
  async function rename(names:ParticipantNames){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');await persist(store.current.rename(names,new Date().toISOString()),prefsRef.current);});}
  async function revise(setup:MatchSetup){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');if(saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');await persist(store.current.revise(setup,new Date().toISOString()),prefsRef.current);});}
  async function finish(ending:Omit<GameEnding,'timestamp'>){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');if(saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');await persist(store.current.finish({...ending,timestamp:new Date().toISOString()}),prefsRef.current);});}
- return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,open,retry,rename,revise,finish,
+ async function remove(matchId:string){await guarded(async()=>{
+  const previousStatus=saveStatus;setSaveStatus('saving');
+  try{await repo.remove(matchId)}catch{setSaveStatus(previousStatus);throw new Error('試合を削除できませんでした。もう一度お試しください。');}
+  if(store.current?.match.matchId===matchId){store.current=null;prefsRef.current={matchId:''};setPrefs(prefsRef.current);setMatch(null);setError('');setSaveStatus('saved');}
+  else setSaveStatus(previousStatus);
+ });}
+ return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,open,retry,rename,revise,finish,remove,
   canUndo:store.current?.canUndo??false,canRedo:store.current?.canRedo??false,
   read:()=>store.current?{matchId:store.current.match.matchId,game:store.current.match.games.length,...currentState(store.current.match),status:store.current.match.status}:null};
 }

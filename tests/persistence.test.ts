@@ -36,3 +36,14 @@ test('legacy paused and flipped match reloads without display preferences and re
  assert.equal(currentState(scorePoint(result!.match,'A',now)).score.A,12);
  await repo.close();
 });
+
+test('deleting a history item preserves the active match and all other results',async()=>{
+ const repo=new MatchRepository(crypto.randomUUID()),old=make(),active=scorePoint(make(),'A',now),other=make();
+ await repo.save(active,{matchId:active.matchId});await repo.import([old,other]);await repo.remove(old.matchId);
+ assert.deepEqual((await repo.load())?.match,active);assert.deepEqual(new Set((await repo.list()).map(m=>m.matchId)),new Set([active.matchId,other.matchId]));await repo.close();
+});
+test('deleting the active match clears its pointer atomically and remains deleted after reopening',async()=>{
+ const dbName=crypto.randomUUID(),repo=new MatchRepository(dbName),active=make(),other=make();
+ await repo.save(active,{matchId:active.matchId});await repo.import([other]);await repo.remove(active.matchId);await repo.close();
+ const reopened=new MatchRepository(dbName);assert.equal(await reopened.load(),null);assert.deepEqual(await reopened.list(),[other]);await reopened.remove(active.matchId);assert.deepEqual(await reopened.list(),[other]);await reopened.close();
+});

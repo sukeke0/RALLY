@@ -38,5 +38,12 @@ export class MatchRepository {
   for(const match of validated)tx.objectStore('matches').add(match);
   await finished;
  }
+ async remove(matchId:string):Promise<void>{
+  const db=await this.open(),tx=db.transaction(['matches','meta'],'readwrite'),finished=done(tx);
+  tx.objectStore('matches').delete(matchId);
+  const meta=tx.objectStore('meta'),active=meta.get('active');
+  active.onsuccess=()=>{if(active.result?.matchId===matchId)meta.delete('active');};
+  await finished;
+ }
  async close(){const db=await this.dbPromise;db?.close();this.dbPromise=null;}
 }
