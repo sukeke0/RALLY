@@ -1,9 +1,8 @@
 import {useI18n} from '../i18n/context';
 import { useEffect,useRef,useState } from 'react';
 import { X,Flag,History,Settings2,ArrowLeft,ArrowRight,CircleHelp,Download,Plus,Check,WifiOff,Sun,RotateCw } from 'lucide-react';
-import { createMatch,currentState,currentGame,gamesWon } from '../domain/engine';
-import { teamName } from '../domain/participants';
-import {GameSet,endingReason} from '../ui/game-set';
+import { createMatch,currentState,currentGame } from '../domain/engine';
+import {GameSet} from '../ui/game-set';
 import {Choice} from '../ui/choice';
 import type {Language} from '../i18n/messages';
 import { RULE_21 } from '../domain/rules';
@@ -21,7 +20,7 @@ type Panel='edit'|'finish'|'setup'|'settings'|'history'|'help'|'next'|'ends'|nul
 export default function Home(){
  const {t,language,setLanguage,languageError}=useI18n();
 
- const session=useMatch(),match=session.match??blank,state=currentState(match),game=currentGame(match),wins=gamesWon(match);
+ const session=useMatch(),match=session.match??blank,state=currentState(match),game=currentGame(match);
  const [panel,setPanel]=useState<Panel>(null),[actionError,setActionError]=useState('');
  const pwa=usePwa(!!session.match&&match.status==='in-progress'),actions=useRef(session);actions.current=session;
  const [endNotice,setEndNotice]=useState(false),priorSide=useRef(state.teamASide);
@@ -37,14 +36,14 @@ export default function Home(){
  {session.error&&<div className="error-message" role="alert">{t(session.error)}<div className="error-actions"><button onClick={()=>run(session.retry)}>{t("保存を再試行")}</button>{session.match&&<button onClick={()=>downloadMatches([match])}>{t("JSONを書き出す")}</button>}</div></div>}
  {actionError&&!session.error&&<div className="error-message" role="alert">{t(actionError)}<button onClick={()=>setActionError('')} className="text-button">{t("閉じる")}</button></div>}
  <div className="match-bar"><div className="game-label">GAME <strong>{game.gameNumber.toString().padStart(2,'0')}</strong><span className="live-pill"><i/>{!session.match?t("開始前"):match.status==='completed'?t("試合終了"):state.finished?t("ゲーム終了"):t("試合中")}</span></div><span className="rule-caption">{match.matchType==='doubles'?t("ダブルス"):t("シングルス")} <b>·</b> {t('{target}点 / {games}ゲーム先取',{target:match.rule.target,games:match.rule.gamesToWin})}</span></div>
- {state.finished&&<div className="result-strip" role="status"><div><strong>{match.status==='completed'?(match.winner?t('{team} の勝利',{team:teamName(match,match.winner)}):t('引き分けで試合終了')):state.winner?t('{team} がゲーム獲得',{team:teamName(match,state.winner)}):t('引き分けでゲーム終了')}</strong><span>{match.status==='completed'?t('ゲーム {a}–{b}',{a:wins.A,b:wins.B}):`GAME ${game.gameNumber} · ${state.score.A}–${state.score.B}`}{game.ending?' · '+t(endingReason(game.ending.reason)):''}</span></div><button className="primary-button" disabled={locked} onClick={()=>setPanel(match.status==='completed'?'setup':'next')}>{match.status==='completed'?t("新しい試合"):t("次のゲームへ")}</button></div>}
+ {state.finished&&<div className="result-strip" role="status"><div><strong>{t('ゲームセット')}</strong></div><button className="primary-button" disabled={locked} onClick={()=>setPanel(match.status==='completed'?'setup':'next')}>{match.status==='completed'?t("新しい試合"):t("次のゲームへ")}</button></div>}
  {endNotice&&<div className="notice"><span>{t("エンドを交替しました。得点カードも左右が変わります。")}</span><button onClick={()=>setEndNotice(false)}>{t("確認")}</button></div>}
- <ScoreCards match={match} state={state} disabled={!session.match||locked||session.saveStatus==='error'} onScore={team=>run(()=>session.score(team))}/>{state.finished&&<p className="tap-hint">{t("訂正するときは「戻る」")}</p>}
+ <ScoreCards match={match} state={state} disabled={!session.match||locked||session.saveStatus==='error'} onScore={team=>run(()=>session.score(team))}/>
  <ScoreSheet match={match}/><Court match={match} state={state}/>
  <div className="toolbar"><button className="undo-button" title={t("直前の得点を取り消す")} disabled={!session.canUndo||locked} onClick={()=>{setEndNotice(false);run(session.undo)}}><ArrowLeft/>{t("戻る")}</button><button className="undo-button" title={t("取り消した得点をやり直す")} disabled={!session.canRedo||locked} onClick={()=>run(session.redo)}>{t("進む")}<ArrowRight/></button></div>
  <footer className="board-footer"><button onClick={()=>setPanel('help')}><CircleHelp size={15}/>{t("サービス位置は選手から見た左右")}</button><span className="device-status">{!pwa.online?<WifiOff size={13}/>:pwa.offlineReady?<Check size={13}/>:null}{pwa.wakeLocked&&<Sun size={13}/>}</span></footer>
  </main>
- <Dialog open={panel!==null} onOpenChange={open=>{if(!open)setPanel(null)}}><DialogContent className="modal" showCloseButton={false}><DialogClose render={<button className="modal-close icon-button" aria-label={t("閉じる")}/> }><X/></DialogClose><DialogTitle>{panel?titles[panel]:''}</DialogTitle><DialogDescription>{panel==='edit'?t('現在の試合の設定を修正します。'):panel==='finish'?t('棄権や時間切れなどによる途中終了を記録します。'):panel==='setup'?t("開始後は得点した側をタップするだけ。"):panel==='history'?t("この端末に保存された試合を確認・再開できます。"):panel==='next'?t("サーバーとレシーバーを確認してください。"):t("審判の位置と、実際の試合に合わせて使用してください。")}</DialogDescription>
+ <Dialog open={panel!==null} onOpenChange={open=>{if(!open)setPanel(null)}}><DialogContent className="modal" showCloseButton={false}><DialogClose render={<button className="modal-close icon-button" aria-label={t("閉じる")}/> }><X/></DialogClose><DialogTitle>{panel?titles[panel]:''}</DialogTitle>{!['settings','help','ends'].includes(panel??'')&&<DialogDescription>{panel==='edit'?t('現在の試合の設定を修正します。'):panel==='finish'?t('棄権や時間切れなどによる途中終了を記録します。'):panel==='setup'?t("開始後は得点した側をタップするだけ。"):panel==='history'?t("この端末に保存された試合を確認・再開できます。"):panel==='next'?t("サーバーとレシーバーを確認してください。"):null}</DialogDescription>}
  {panel==='setup'&&<Setup previous={session.match??undefined} onStart={async setup=>{await session.start(setup);setEndNotice(false);setPanel(null)}}/>}
  {panel==='edit'&&<Setup key="edit" previous={match} editing onStart={async setup=>{await session.revise(setup);setEndNotice(false);setPanel(null)}}/>}
  {panel==='finish'&&<GameSet match={match} onFinish={async ending=>{await session.finish(ending);setEndNotice(false);setPanel(null)}}/>}

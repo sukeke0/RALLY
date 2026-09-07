@@ -206,5 +206,6 @@
   "変更後のルールでは、次のゲームへ進んだ履歴と矛盾します。": "The revised rules conflict with a recorded transition to the next game.",
   "変更後のルールでは、コートチェンジの前にゲームが終了します。": "Under the revised rules, the game ends before a recorded change of ends.",
   "変更後のルールでは、記録済みの得点より前にゲームが終了します。": "Under the revised rules, the game ends before the last recorded point.",
-  "変更後のルールと途中終了の記録が矛盾します。先に「戻る」で途中終了を取り消してください。": "The revised rules conflict with an early ending. Use Back to cancel the early ending first."
+  "変更後のルールと途中終了の記録が矛盾します。先に「戻る」で途中終了を取り消してください。": "The revised rules conflict with an early ending. Use Back to cancel the early ending first.",
+  "ファーストサーバー": "First server"
 }

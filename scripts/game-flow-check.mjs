@@ -40,7 +40,7 @@ try{
  await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player').count(),2);
  for(let i=0;i<8;i++)await add('B');for(let i=0;i<7;i++)await add('B');
- assert.ok(await page.getByText('Team B がゲーム獲得',{exact:true}).isVisible());
+ assert.ok(await page.getByText('ゲームセット',{exact:true}).isVisible());
  await page.getByRole('button',{name:'試合履歴',exact:true}).click();await page.locator('.history-item').first().waitFor();assert.equal(await page.locator('.history-item').count(),2);
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'全試合を書き出す',exact:true}).click();const download=await downloadPromise;await download.saveAs('outputs/test-export.json');
  await page.locator('input[type=file]').setInputFiles('outputs/test-export.json');await page.getByText('2件の試合をコピーとして保存しました。',{exact:true}).waitFor();assert.equal(await page.locator('.history-item').count(),4);

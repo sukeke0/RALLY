@@ -27,7 +27,7 @@ try{
  await page.getByRole('button',{name:'Set up a new match',exact:true}).click();await english();
  await choose('Scoring rules','Custom');await page.getByLabel('Target score',{exact:true}).fill('1');await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('The change-of-ends score must be below the target score.',{exact:true}).waitFor();await english();
  await choose('Scoring rules','21 points');await page.getByLabel('A1',{exact:true}).fill('John');await page.getByLabel('B1',{exact:true}).fill('Bob');await page.getByRole('button',{name:'Start match',exact:true}).click();await saved();
- await english();assert.equal(await page.locator('.court-section h2').textContent(),'02Court');
+ await english();assert.equal(await page.locator('.court-section h2').textContent(),'Court');
  assert.equal(await page.locator('.court-player.partner .court-role').allTextContents().then(x=>x.join('')),'');
  await checkArrow();await add('a');await checkArrow();await add('b');await checkArrow();
  await page.getByRole('button',{name:'Settings',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Rotate display 180°',exact:true}).count(),0);await page.getByRole('button',{name:'Change ends',exact:true}).click();await page.getByRole('button',{name:'Confirm change of ends',exact:true}).click();await saved();await page.getByRole('button',{name:'OK',exact:true}).click();await checkArrow();
@@ -39,7 +39,7 @@ try{
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Help & install app',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Edit match settings',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await choose('Language','日本語');await page.getByRole('button',{name:'閉じる',exact:true}).click();
- assert.equal(await page.locator('html').getAttribute('lang'),'ja');assert.equal(await page.locator('.court-section h2').textContent(),'02コート');assert.equal(await page.getByText('審判から見た配置',{exact:true}).count(),0);
+ assert.equal(await page.locator('html').getAttribute('lang'),'ja');assert.equal(await page.locator('.court-section h2').textContent(),'コート');assert.equal(await page.getByText('審判から見た配置',{exact:true}).count(),0);
  await page.getByRole('dialog').waitFor({state:'hidden'});await page.screenshot({path:'outputs/japanese-court.png',fullPage:true});
  assert.deepEqual(errors,[]);const result={checks:['English settings before match','English setup and validation errors','English match/history/help/name editing','language retained on reload and offline','language change preserves score and names','Japanese switch back','court heading and role labels simplified','arrow anchored to actual card edges','umpire fixed'],distances,errors};console.log(JSON.stringify(result,null,2));await writeFile('outputs/language-results.json',JSON.stringify(result,null,2));
 }finally{await browser.close()}
