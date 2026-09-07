@@ -9,7 +9,7 @@
   "左": "Left",
   "ゲーム終了": "Game over",
   "得点入力": "Score entry",
-  "獲得ゲーム": "Games won",
+  "{team}のゲームスコア：{score}": "{team} game score: {score}",
   "得点経過": "Score sheet",
   "横にスクロール →": "Scroll →",
   "RALLY ホーム": "RALLY home",
