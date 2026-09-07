@@ -37,3 +37,5 @@
 @media(max-width:600px) and (max-height:740px){.score-cards{row-gap:6px}.game-summary{min-height:46px;gap:26px}.game-summary-values{font-size:26px}.score-card .score-plus{bottom:9px;right:10px}.score-card .score-number{padding-bottom:6px}}
 
 .player-name-wrap{position:relative}.first-server-flag{position:absolute;right:-7px;top:-9px;font-size:18px;line-height:1;filter:drop-shadow(0 1px 1px #173e3160);pointer-events:none}
+
+.result-strip.next-set{padding:0;border:0;background:transparent}.result-strip.next-set .primary-button{width:100%;min-height:44px}
