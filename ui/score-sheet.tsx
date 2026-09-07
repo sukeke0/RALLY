@@ -1,0 +1,12 @@
+import { useEffect,useRef,useState } from 'react';
+import type { Match } from '../domain/model';
+import { Table,TableBody,TableRow,TableCell } from '../components/ui/table';
+export function ScoreSheet({match}:{match:Match}) {
+ const [selected,setSelected]=useState(match.games.length-1);const ref=useRef<HTMLDivElement>(null);
+ const active=match.games.length-1,game=match.games[Math.min(selected,active)],count=game.rallyHistory.length;
+ const activeCount=match.games[active].rallyHistory.length;
+ useEffect(()=>setSelected(active),[active,activeCount,match.matchId]);
+ useEffect(()=>{const scroller=ref.current?.querySelector('[data-slot="table-container"]');if(scroller)scroller.scrollLeft=scroller.scrollWidth;},[count,selected]);
+ const cells=Math.max(12,count);
+ return <section className="sheet-section"><div className="section-heading"><h2><span className="section-number">01</span>得点経過</h2><div className="sheet-meta">{match.games.length>1&&<div className="game-switch">{match.games.map((g,i)=><button key={i} aria-pressed={selected===i} onClick={()=>setSelected(i)}>G{g.gameNumber}</button>)}</div>}<span>{count} ラリー</span><span className="desktop-only">横にスクロール →</span></div></div><div className="score-sheet" ref={ref}><Table aria-label={`ゲーム${game.gameNumber}の得点経過`}><TableBody>{(['A','B'] as const).map(team=><TableRow key={team}><TableCell className={`row-label team-${team.toLowerCase()}`} role="rowheader">{team}</TableCell>{Array.from({length:cells},(_,i)=>{const rally=game.rallyHistory[i];return <TableCell key={i} className={`${rally?.winner===team?'scored':''} ${i===count-1?'latest':''}`} title={rally?`ラリー${i+1}：${rally.scoreAfter.A}–${rally.scoreAfter.B}`:undefined}>{rally?.winner===team?rally.scoreAfter[team]:''}</TableCell>;})}</TableRow>)}</TableBody></Table></div></section>;
+}
