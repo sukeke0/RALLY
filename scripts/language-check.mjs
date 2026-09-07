@@ -37,7 +37,7 @@ try{
  await page.evaluate(()=>navigator.serviceWorker.ready);await context.setOffline(true);await page.reload();await saved();assert.equal(await page.locator('html').getAttribute('lang'),'en');await add('a');await english();await context.setOffline(false);
  await page.getByRole('button',{name:'Match history',exact:true}).click();await page.locator('.history-item').first().waitFor();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Help & install app',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
- await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Edit team and player names',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
+ await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Edit match settings',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await choose('Language','日本語');await page.getByRole('button',{name:'閉じる',exact:true}).click();
  assert.equal(await page.locator('html').getAttribute('lang'),'ja');assert.equal(await page.locator('.court-section h2').textContent(),'02コート');assert.equal(await page.getByText('審判から見た配置',{exact:true}).count(),0);
  await page.getByRole('dialog').waitFor({state:'hidden'});await page.screenshot({path:'outputs/japanese-court.png',fullPage:true});
