@@ -25,14 +25,13 @@ try{
  await page.getByRole('button',{name:'進む',exact:true}).click();await saved();assert.equal(await page.locator('.team-b .score-number').textContent(),'1');assert.equal(await page.locator('.team-a .player-names').textContent(),'James / A2');
  await page.reload();await saved();assert.equal(await page.locator('.team-a .team-name').textContent(),'ブルースター');assert.equal(await page.locator('.team-a .player-names').textContent(),'James / A2');
  assert.equal(await page.getByText('NEXT SERVE',{exact:true}).count(),0);assert.equal(await page.locator('.toolbar button').count(),2);assert.equal(await page.getByRole('button',{name:'表示反転',exact:true}).count(),0);
- await umpire();await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'表示だけを180°反転',exact:true}).click();await saved();await umpire();
- await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'実際のエンドを交替',exact:true}).click();await page.getByRole('button',{name:'エンド交替を記録',exact:true}).click();await saved();await umpire();
+ await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'コートチェンジ',exact:true}).click();await page.getByRole('button',{name:'コートチェンジする',exact:true}).click();await saved();await umpire();
  await page.getByRole('button',{name:'確認',exact:true}).click();
  assert.equal(await page.locator('.serve-arrow').getAttribute('marker-end'),'url(#serve-arrow-head)');
  const court=await page.locator('.court').boundingBox();const arrow=await page.locator('.serve-arrow').boundingBox();assert.ok(arrow.width>0&&arrow.x>court.x&&arrow.x+arrow.width<court.x+court.width);
  assert.equal(await page.locator('[data-slot=table-container]').evaluate(el=>el.scrollLeft),0);
  await mkdir('outputs',{recursive:true});await page.screenshot({path:'outputs/revised-mobile.png',fullPage:true});
  const sizes=[];for(const [width,height]of [[390,844],[375,667]]){await page.setViewportSize({width,height});const size=await page.evaluate(()=>({width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,toolbarBottom:document.querySelector('.toolbar').getBoundingClientRect().bottom}));assert.ok(size.toolbarBottom<=height);assert.equal(size.scrollWidth,width);sizes.push(size)}
- assert.deepEqual(errors,[]);const result={checks:['team/player names at setup','cancel edit','in-match rename','scores and server preserved','pending Redo retains new names','reload retains names','two navigation buttons only','NEXT SERVE removed','umpire fixed across view flip and real end change','visible arrow marker'],sizes,errors};await writeFile('outputs/name-edit-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+ assert.deepEqual(errors,[]);const result={checks:['team/player names at setup','cancel edit','in-match rename','scores and server preserved','pending Redo retains new names','reload retains names','two navigation buttons only','NEXT SERVE removed','umpire fixed across court change','visible arrow marker'],sizes,errors};await writeFile('outputs/name-edit-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 }finally{await browser.close()}
 

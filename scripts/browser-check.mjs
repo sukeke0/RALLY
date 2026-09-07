@@ -20,7 +20,7 @@ try{
  await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player.server strong').textContent(),'B2');assert.equal(await page.locator('.court-player.receiver strong').textContent(),'A2');
  await page.getByRole('button',{name:'進む',exact:true}).click();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
- await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'表示だけを180°反転',exact:true}).click();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
+ await page.getByRole('button',{name:'設定',exact:true}).click();assert.equal(await page.getByRole('button',{name:'表示だけを180°反転',exact:true}).count(),0);await page.getByRole('button',{name:'閉じる',exact:true}).click();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
  await page.evaluate(()=>navigator.serviceWorker.ready);
  await context.setOffline(true);await page.reload();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
  await add('B');assert.equal(await page.locator('.court-player.server strong').textContent(),'B1');
@@ -30,7 +30,7 @@ try{
  const sizes=[];for(const [width,height] of [[390,844],[375,667],[360,740],[1440,1000]]){await page.setViewportSize({width,height});sizes.push(await page.evaluate(()=>({width:innerWidth,height:innerHeight,documentWidth:document.documentElement.scrollWidth,documentHeight:document.documentElement.scrollHeight,undoBottom:document.querySelector('.toolbar').getBoundingClientRect().bottom})));}
  const webmcp=await page.evaluate(()=>({documentRegistry:!!document.modelContext?.registerTool,navigatorRegistry:!!navigator.modelContext?.registerTool}));
  assert.deepEqual(errors,[]);
- const result={checks:['mobile scoring','service order','Undo/Redo','reload restores IndexedDB','view flip','offline launch','offline scoring and reload'],sizes,webmcp,errors};await writeFile('outputs/browser-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
+ const result={checks:['mobile scoring','service order','Undo/Redo','reload restores IndexedDB','display rotation removed','offline launch','offline scoring and reload'],sizes,webmcp,errors};await writeFile('outputs/browser-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 }finally{await browser.close()}
 
 

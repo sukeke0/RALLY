@@ -8,12 +8,12 @@ RallyにはrallyNumber / winner / scoreAfter / serverBefore / receiverBefore / c
 
 Ruleはtarget / winBy / cap / gamesToWin / interval { at, seconds, betweenGamesSeconds } / ends { betweenGames, decidingGameAt }に分離しています。途中でルールを変更しません。
 
-IndexedDBの`matches`ストアはmatchIdが主キー。`meta`ストアのactiveキーにはmatchId / flippedを保持します。試合と再開情報を同じトランザクションで保存し、トランザクション完了後に保存済みと表示します。
+IndexedDBの`matches`ストアはmatchIdが主キー。`meta`ストアのactiveキーにはmatchIdを保持します。試合と再開情報を同じトランザクションで保存し、トランザクション完了後に保存済みと表示します。
 
 ## 状態遷移
 
 設定 → 試合中 → インターバル → 試合中 → ゲーム終了 → 次ゲーム設定 → 試合中、必要ゲーム数に到達すると試合終了です。
-休憩タイマーや休憩による入力停止はありません。旧データのpauseは読み込み時に除外します。Ruleのintervalは旧保存データ・JSONとの互換性のため保持し、新規試合では無効値を使用します。
+休憩タイマーや休憩による入力停止はありません。旧データのpauseとflippedは読み込み時に除外します。Ruleのintervalは旧保存データ・JSONとの互換性のため保持し、新規試合では無効値を使用します。
 
 ## サービス順
 

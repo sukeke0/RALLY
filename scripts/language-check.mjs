@@ -30,7 +30,7 @@ try{
  await english();assert.equal(await page.locator('.court-section h2').textContent(),'02Court');
  assert.equal(await page.locator('.court-player.partner .court-role').allTextContents().then(x=>x.join('')),'');
  await checkArrow();await add('a');await checkArrow();await add('b');await checkArrow();
- await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Rotate display 180°',exact:true}).click();await saved();await checkArrow();
+ await page.getByRole('button',{name:'Settings',exact:true}).click();assert.equal(await page.getByRole('button',{name:'Rotate display 180°',exact:true}).count(),0);await page.getByRole('button',{name:'Change ends',exact:true}).click();await page.getByRole('button',{name:'Confirm change of ends',exact:true}).click();await saved();await page.getByRole('button',{name:'OK',exact:true}).click();await checkArrow();
  await page.getByRole('dialog').waitFor({state:'hidden'});await mkdir('outputs',{recursive:true});await page.screenshot({path:'outputs/english-court.png',fullPage:true});
  for(const width of [375,360,800]){await page.setViewportSize({width,height:width===800?1000:740});await page.waitForTimeout(50);await checkArrow();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),width);}
  await page.setViewportSize({width:390,height:844});await page.reload();await saved();assert.equal(await page.locator('html').getAttribute('lang'),'en');await english();
