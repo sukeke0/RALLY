@@ -15,14 +15,14 @@ try{
  assert.equal(await page.locator('.court-player.server strong').textContent(),'A1');
  await add('A');assert.equal(await page.locator('.court-player.receiver strong').textContent(),'B2');
  await add('B');await add('B');await add('A');
- const before=await page.locator('.next-serve').textContent();
- await page.reload();await saved();assert.equal(await page.locator('.next-serve').textContent(),before);
- await page.getByRole('button',{name:'1点戻す',exact:true}).click();await saved();
+ const before=await page.locator('.court').getAttribute('aria-label');
+ await page.reload();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
+ await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player.server strong').textContent(),'B2');assert.equal(await page.locator('.court-player.receiver strong').textContent(),'A2');
- await page.getByRole('button',{name:'やり直す',exact:true}).click();await saved();assert.equal(await page.locator('.next-serve').textContent(),before);
- await page.getByRole('button',{name:'表示反転',exact:true}).click();await saved();assert.equal(await page.locator('.next-serve').textContent(),before);
+ await page.getByRole('button',{name:'進む',exact:true}).click();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
+ await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'表示だけを180°反転',exact:true}).click();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
  await page.evaluate(()=>navigator.serviceWorker.ready);
- await context.setOffline(true);await page.reload();await saved();assert.equal(await page.locator('.next-serve').textContent(),before);
+ await context.setOffline(true);await page.reload();await saved();assert.equal(await page.locator('.court').getAttribute('aria-label'),before);
  await add('B');assert.equal(await page.locator('.court-player.server strong').textContent(),'B1');
  await page.reload();await saved();assert.equal(await page.locator('.court-player.server strong').textContent(),'B1');
  await context.setOffline(false);
@@ -32,5 +32,6 @@ try{
  assert.deepEqual(errors,[]);
  const result={checks:['mobile scoring','service order','Undo/Redo','reload restores IndexedDB','view flip','offline launch','offline scoring and reload'],sizes,webmcp,errors};await writeFile('outputs/browser-results.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));
 }finally{await browser.close()}
+
 
 

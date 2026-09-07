@@ -3,6 +3,7 @@ import type { Match,MatchSetup,PlayerId,Team } from '../domain/model';
 import { createMatch,currentState,currentGame } from '../domain/engine';
 import { MatchRepository,type Preferences } from '../persistence/repository';
 import { MatchStore } from './match-store';
+import type { ParticipantNames } from '../domain/participants';
 export function useMatch(){
  const [repo]=useState(()=>new MatchRepository());
  const store=useRef<MatchStore|null>(null),prefsRef=useRef<Preferences>({matchId:'',flipped:false,pause:null}),busy=useRef(false);
@@ -44,7 +45,8 @@ export function useMatch(){
  async function resume(){await guarded(async()=>{if(store.current)await persist(store.current.match,{...prefsRef.current,pause:null});});}
  async function open(saved:Match){await guarded(async()=>{if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');store.current=new MatchStore(saved);await persist(saved,{matchId:saved.matchId,flipped:false,pause:null});});}
  async function retry(){await guarded(async()=>{if(store.current)await persist(store.current.match,prefsRef.current);else{const result=await repo.load();if(result){store.current=new MatchStore(result.match);setMatch(result.match);prefsRef.current=result.prefs;setPrefs(result.prefs);}setSaveStatus('saved');setError('');}});}
- return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,flip,ends,resume,open,retry,
+ async function rename(names:ParticipantNames){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');await persist(store.current.rename(names,new Date().toISOString()),prefsRef.current);});}
+ return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,flip,ends,resume,open,retry,rename,
   canUndo:store.current?.canUndo??false,canRedo:store.current?.canRedo??false,
   read:()=>store.current?{matchId:store.current.match.matchId,game:store.current.match.games.length,...currentState(store.current.match),status:store.current.match.status}:null};
 }

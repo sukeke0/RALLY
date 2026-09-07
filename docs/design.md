@@ -2,7 +2,7 @@
 
 ## モデル
 
-MatchにはschemaVersion / matchId / createdAt / updatedAt / matchType / players / rule / games / status / winnerを保持します。
+MatchにはschemaVersion / matchId / createdAt / updatedAt / matchType / players / teamNames（旧データでは省略可） / rule / games / status / winnerを保持します。
 GameにはgameNumber / initialServingTeam / initialServer / initialReceiver / initialCourtState / initialTeamASide / rallyHistory / endChanges / finalScore / winnerを保持します。
 RallyにはrallyNumber / winner / scoreAfter / serverBefore / receiverBefore / courtStateBefore / teamASideBefore / timestampを保持します。
 
@@ -24,7 +24,7 @@ IndexedDBの`matches`ストアはmatchIdが主キー。`meta`ストアのactive�
 - サーブ側得点が偶数なら右、奇数なら左。そのコートの担当者がサーバー、相手側の同じ論理コート担当者がレシーバーです。
 - シングルスはサーブ側の偶奇に従って両者のコートを表示します。
 
-右コートの表示位置は、画面左側チームが下、画面右側チームが上です。これにより対角のサーブになります。viewFlippedは計算済み座標を180度回転するだけです。
+右コートの表示位置は、画面左側チームが下、画面右側チームが上です。これにより対角のサーブになります。viewFlippedは選手の計算済み座標を180度回転するだけです。審判マーカーは常に中央下側に固定します。
 
 ## Undo / Redo
 
@@ -56,6 +56,10 @@ B │   │ 1 │   │ …
 │  A1（サーブ）   │        B2       │
 └─────────────────┴─────────────────┘
                   審判
-次のサーブ       A1 → B1       右から
-        1点戻す     Redo      表示反転
+             戻る             進む
 ```
+
+## 名前の編集
+
+設定からチーム名と選手名を変更できます。選手ID・得点履歴・サービス順は変わりません。Redoに保持された試合にも同じ名前を反映し、得点の取り消し・やり直しで名前が古い表示に戻らないようにしています。teamNamesがない旧データはTeam A / Team Bを表示し、そのまま再開できます。
+

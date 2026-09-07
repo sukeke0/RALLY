@@ -55,6 +55,7 @@ export interface Match {
   updatedAt: string;
   matchType: MatchType;
   players: Record<PlayerId, string>;
+  teamNames?: Record<Team, string>;
   rule: Rule;
   games: Game[];
   status: 'in-progress' | 'completed';
@@ -63,6 +64,7 @@ export interface Match {
 export interface MatchSetup {
   matchType: MatchType;
   players: Record<PlayerId, string>;
+  teamNames?: Record<Team, string>;
   rule: Rule;
   servingTeam: Team;
   server: PlayerId;

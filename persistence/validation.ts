@@ -11,10 +11,11 @@ export function validateMatch(value: unknown): Match {
   const m=value as Match;
   if(!m||m.schemaVersion!==1||!['singles','doubles'].includes(m.matchType)||typeof m.matchId!=='string'||!m.matchId||m.matchId.length>120||!date(m.createdAt)||!date(m.updatedAt))fail();
   if(!m.players||ids.some(id=>typeof m.players[id as PlayerId]!=='string'||m.players[id as PlayerId].length>40))fail();
+  if(m.teamNames!==undefined&&(!m.teamNames||['A','B'].some(team=>typeof m.teamNames?.[team as Team]!=='string'||m.teamNames[team as Team].length>40)))fail();
   validateRule(m.rule);
   if(!Array.isArray(m.games)||m.games.length<1||m.games.length>m.rule.gamesToWin*2-1)fail();
   const first=m.games[0];
-  let built=createMatch({matchType:m.matchType,players:m.players,rule:m.rule,servingTeam:first.initialServingTeam,server:first.initialServer,receiver:first.initialReceiver,teamASide:first.initialTeamASide},m.matchId,m.createdAt);
+  let built=createMatch({matchType:m.matchType,players:m.players,teamNames:m.teamNames,rule:m.rule,servingTeam:first.initialServingTeam,server:first.initialServer,receiver:first.initialReceiver,teamASide:first.initialTeamASide},m.matchId,m.createdAt);
   for(let i=0;i<m.games.length;i++){
    const g=m.games[i];
    if(!ids.includes(g.initialServer)||!ids.includes(g.initialReceiver)||!['left','right'].includes(g.initialTeamASide)||!['A','B'].includes(g.initialServingTeam)||g.gameNumber!==i+1||!Array.isArray(g.rallyHistory)||g.rallyHistory.length>m.rule.cap*2-1||!Array.isArray(g.endChanges)||g.endChanges.length>1000)fail();

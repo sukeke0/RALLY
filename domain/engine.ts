@@ -1,5 +1,6 @@
 import type { CourtState, Game, GameState, Match, MatchSetup, PlayerId, Rule, Side, Team } from './model.ts';
 import { gameWinner, validateRule } from './rules.ts';
+import { normalizeNames } from './participants.ts';
 export const opponent = (team: Team): Team => team === 'A' ? 'B' : 'A';
 export const opposite = (side: Side): Side => side === 'left' ? 'right' : 'left';
 export const serviceCourt = (score: number): Side => score % 2 === 0 ? 'right' : 'left';
@@ -24,7 +25,7 @@ export function createMatch(setup: MatchSetup, matchId: string, now: string): Ma
   const players = { ...setup.players };
   for (const id of ['A1','A2','B1','B2'] as const) players[id] = players[id]?.trim().slice(0,40) || id;
   return { schemaVersion: 1, matchId, createdAt: now, updatedAt: now, matchType: setup.matchType,
-    players, rule: copy(setup.rule), games: [makeGame(setup.matchType,1,setup.servingTeam,setup.server,setup.receiver,setup.teamASide)],
+    players, ...(setup.teamNames ? {teamNames:normalizeNames({teamNames:setup.teamNames,players}).teamNames} : {}), rule: copy(setup.rule), games: [makeGame(setup.matchType,1,setup.servingTeam,setup.server,setup.receiver,setup.teamASide)],
     status: 'in-progress', winner: null };
 }
 export function initialState(game: Game): GameState {

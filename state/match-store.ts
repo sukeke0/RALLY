@@ -1,11 +1,19 @@
 import type { Match, PlayerId, Team } from '../domain/model.ts';
 import { changeEnds, nextGame, scorePoint, undoPoint } from '../domain/engine.ts';
+import { renameParticipants, type ParticipantNames } from '../domain/participants.ts';
 export class MatchStore {
   match: Match;
   private redoStack: Match[] = [];
   constructor(match: Match) { this.match = structuredClone(match); }
   get canUndo() { return this.match.games.some(game=>game.rallyHistory.length>0); }
   get canRedo() { return this.redoStack.length>0; }
+  rename(names: ParticipantNames, now: string) {
+    const renamed = renameParticipants(this.match, names, now);
+    // Names identify the same participants across every score snapshot.
+    this.redoStack = this.redoStack.map(match => renameParticipants(match, names, match.updatedAt));
+    this.match = renamed;
+    return this.match;
+  }
   score(team: Team, now: string) { this.match=scorePoint(this.match,team,now); this.redoStack=[]; return this.match; }
   undo(now: string) { if(this.canUndo) { this.redoStack.push(this.match); this.match=undoPoint(this.match,now); } return this.match; }
   redo(now: string) { const match=this.redoStack.pop(); if(match) this.match={...match,updatedAt:now}; return this.match; }

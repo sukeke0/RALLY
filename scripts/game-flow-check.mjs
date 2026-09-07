@@ -26,7 +26,7 @@ try{
  await page.getByRole('button',{name:'GAME 2 を開始',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player.server strong').textContent(),'田中');
  assert.equal(await page.locator('.score-card').first().getAttribute('class'),'score-card team-b');
- await page.getByRole('button',{name:'1点戻す',exact:true}).click();await saved();
+ await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();
  assert.equal(await page.locator('.score-card.team-a .score-number').textContent(),'20');assert.equal(await page.locator('.court-player.server strong').textContent(),'A2');
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'新しい試合を設定',exact:true}).click();
  await choose('種目','シングルス');await choose('得点ルール','15点制');
@@ -40,5 +40,6 @@ try{
  const checks=['custom player selection','interval input lock','interval reload','automatic game end','next game reselect and ends','Undo across games','singles 15 point game','history persistence','JSON export/import'];assert.deepEqual(errors,[]);
  await writeFile('outputs/game-flow-results.json',JSON.stringify({checks,errors},null,2));console.log(JSON.stringify({checks,errors},null,2));
 }finally{await browser.close()}
+
 
 
