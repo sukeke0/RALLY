@@ -17,7 +17,7 @@ try{
  await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
  await score('a');await score('b');await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();
  const before=await page.locator('.court').getAttribute('aria-label');
- await edit();await page.getByLabel('チームAの名前',{exact:true}).fill('テスト変更');await page.getByRole('button',{name:'Close',exact:true}).click();assert.equal(await page.locator('.team-a .team-name').textContent(),'青空クラブ');
+ await edit();await page.getByLabel('チームAの名前',{exact:true}).fill('テスト変更');await page.getByRole('button',{name:'閉じる',exact:true}).click();assert.equal(await page.locator('.team-a .team-name').textContent(),'青空クラブ');
  await edit();await page.getByLabel('チームAの名前',{exact:true}).fill('ブルースター');await page.getByLabel('A1',{exact:true}).fill('James');await page.getByRole('button',{name:'名前を保存',exact:true}).click();await saved();
  assert.equal(await page.locator('.team-a .score-number').textContent(),'1');assert.equal(await page.locator('.team-b .score-number').textContent(),'0');
  assert.equal(await page.locator('.court-player.server strong').textContent(),'James');

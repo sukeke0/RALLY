@@ -27,3 +27,5 @@
 /* Keep the umpire fixed on the near sideline in every display orientation. */
 .umpire-marker{top:auto;bottom:0}.team-name{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.team-heading>.team-code,.team-heading>.serve-tag{flex-shrink:0}.court-role{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.court-lines .serve-arrow{stroke:#e5ff95;stroke-width:4;stroke-dasharray:5 8;stroke-linecap:round}.toolbar>.undo-button{flex:1;min-width:0}.result-strip strong{overflow-wrap:anywhere}
 
+.court-role{min-height:1.25em}.modal-close{position:absolute;right:12px;top:12px;border:0;background:transparent;width:32px;height:32px}.modal h2{padding-right:32px}html[lang=en] .rule-caption{white-space:nowrap}html[lang=en] .game-wins{gap:6px}html[lang=en] .serve-tag{font-size:10px}
+@media(max-width:600px){html[lang=en] .match-bar{flex-wrap:wrap;row-gap:3px}html[lang=en] .rule-caption{margin-left:auto;font-size:10px}html[lang=en] .court-role{font-size:10px}html[lang=en] .board-footer{font-size:10px}html[lang=en] .player-inputs{min-width:0}html[lang=en] .field{min-width:0}html[lang=en] .choice-trigger{white-space:normal!important;text-align:left}}
