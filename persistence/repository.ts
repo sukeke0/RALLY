@@ -1,7 +1,6 @@
 import type { Match } from '../domain/model.ts';
 import { validateMatch } from './validation.ts';
-export interface Pause { key:string; until:number; label:string }
-export interface Preferences { matchId:string; flipped:boolean; pause:Pause|null }
+export interface Preferences { matchId:string; flipped:boolean }
 const request=<T>(req:IDBRequest<T>)=>new Promise<T>((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});
 const done=(tx:IDBTransaction)=>new Promise<void>((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error??new Error('保存が中断されました。'));});
 export class MatchRepository {
@@ -28,7 +27,7 @@ export class MatchRepository {
   if(!prefs)return null;
   const raw=await request(db.transaction('matches').objectStore('matches').get(prefs.matchId));
   if(!raw)throw new Error('保存した試合が見つかりません。試合履歴を確認してください。');
-  return {match:validateMatch(raw),prefs};
+  return {match:validateMatch(raw),prefs:{matchId:prefs.matchId,flipped:prefs.flipped}};
  }
  async list():Promise<Match[]>{
   const db=await this.open();const matches=await request(db.transaction('matches').objectStore('matches').getAll());

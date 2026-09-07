@@ -11,6 +11,7 @@ export interface Rule {
   winBy: number;
   cap: number;
   gamesToWin: number;
+  // Legacy export compatibility; new matches disable intervals.
   interval: { at: number | null; seconds: number; betweenGamesSeconds: number };
   ends: { betweenGames: boolean; decidingGameAt: number | null };
 }

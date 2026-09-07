@@ -80,7 +80,6 @@
   "対応端末では試合中に画面の点灯を維持します。": "On supported devices, RALLY keeps the screen on during a match.",
   "試合データ": "Match data",
   "この端末のブラウザ内に保存します。別の端末への移行やバックアップは「試合履歴」のJSON書き出しをご利用ください。ブラウザのサイトデータを削除すると記録も消えます。": "Matches are stored in this browser on this device. Use JSON export in Match history for backups or transfers. Clearing site data also deletes the saved matches.",
-  "15点制プリセット：15点・2点差・上限21点、8点で休憩。大会の要項に合わせて、開始前にルールを確認してください。": "15-point preset: win by 2, capped at 21, interval at 8. Check the competition’s rules before starting.",
   "種目": "Match type",
   "得点ルール": "Scoring rules",
   "21点制": "21 points",
@@ -176,5 +175,7 @@
   "対": "vs",
   "勝利": "Winner",
   "言語設定を保存できませんでした。": "Could not save the language preference.",
-  "言語": "Language"
+  "言語": "Language",
+  "15点制プリセット：15点・2点差・上限21点。大会の要項に合わせて、開始前にルールを確認してください。": "15-point preset: win by 2, capped at 21. Check the competition’s rules before starting.",
+  "エンド交替の得点は、基本得点未満にしてください。": "The change-of-ends score must be below the target score."
 }

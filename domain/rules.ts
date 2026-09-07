@@ -1,12 +1,12 @@
 import type { Rule, Score, Team } from './model.ts';
 export const RULE_21: Rule = {
   id: '21', name: '21点制', target: 21, winBy: 2, cap: 30, gamesToWin: 2,
-  interval: { at: 11, seconds: 60, betweenGamesSeconds: 120 },
+  interval: { at: null, seconds: 0, betweenGamesSeconds: 0 },
   ends: { betweenGames: true, decidingGameAt: 11 },
 };
 export const RULE_15: Rule = {
   id: '15', name: '15点制', target: 15, winBy: 2, cap: 21, gamesToWin: 2,
-  interval: { at: 8, seconds: 60, betweenGamesSeconds: 120 },
+  interval: { at: null, seconds: 0, betweenGamesSeconds: 0 },
   ends: { betweenGames: true, decidingGameAt: 8 },
 };
 export function validateRule(rule: Rule): void {
@@ -15,7 +15,9 @@ export function validateRule(rule: Rule): void {
     if (!Number.isInteger(value) || value < 1 || value > max) throw new Error(`${label}の設定を確認してください。`);
   }
   if (rule.cap < rule.target) throw new Error('最大得点は基本得点以上にしてください。');
-  for (const value of [rule.interval.at, rule.ends.decidingGameAt]) {
+  if (rule.ends.decidingGameAt !== null && (!Number.isInteger(rule.ends.decidingGameAt) || rule.ends.decidingGameAt < 1 || rule.ends.decidingGameAt >= rule.target)) throw new Error('エンド交替の得点は、基本得点未満にしてください。');
+  // Retain legacy interval validation for saved matches and JSON imports.
+  for (const value of [rule.interval.at]) {
     if (value !== null && (!Number.isInteger(value) || value < 1 || value >= rule.target)) throw new Error('休憩・エンド交替の得点は、基本得点未満にしてください。');
   }
   for (const value of [rule.interval.seconds, rule.interval.betweenGamesSeconds]) {

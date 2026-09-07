@@ -25,7 +25,7 @@ try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語','English');
  assert.equal(await page.locator('html').getAttribute('lang'),'en');await english();
  await page.getByRole('button',{name:'Set up a new match',exact:true}).click();await english();
- await choose('Scoring rules','Custom');await page.getByLabel('Target score',{exact:true}).fill('1');await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('Interval and change-of-ends scores must be below the target score.',{exact:true}).waitFor();await english();
+ await choose('Scoring rules','Custom');await page.getByLabel('Target score',{exact:true}).fill('1');await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('The change-of-ends score must be below the target score.',{exact:true}).waitFor();await english();
  await choose('Scoring rules','21 points');await page.getByLabel('A1',{exact:true}).fill('John');await page.getByLabel('B1',{exact:true}).fill('Bob');await page.getByRole('button',{name:'Start match',exact:true}).click();await saved();
  await english();assert.equal(await page.locator('.court-section h2').textContent(),'02Court');
  assert.equal(await page.locator('.court-player.partner .court-role').allTextContents().then(x=>x.join('')),'');
