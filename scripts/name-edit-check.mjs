@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import { chromium } from 'playwright';
 const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
-const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
 const score=async t=>{await page.locator(`.score-card.team-${t}`).click();await saved()};

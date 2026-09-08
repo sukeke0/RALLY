@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import { chromium } from 'playwright';
-const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true}),context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
+const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true}),context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const choose=async(label,value)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:value,exact:true}).click()};
-const english=async()=>{const text=await page.locator('body').innerText();assert.ok(!/[\u3040-\u30ff\u3400-\u9fff]/.test(text),text)};
+const english=async()=>{const text=(await page.locator('body').innerText()).replaceAll('言語/Language','');assert.ok(!/[\u3040-\u30ff\u3400-\u9fff]/.test(text),text)};
 const saved=()=>page.getByText('Saved on device',{exact:true}).waitFor();
 const add=async team=>{await page.locator('.score-card.team-'+team).click();await saved()};
 const distances=[];
@@ -20,7 +20,7 @@ const checkArrow=async()=>{
  assert.ok(data.startGap>0&&data.startGap<2.1,JSON.stringify(data));assert.ok(data.endGap>0&&data.endGap<2.1,JSON.stringify(data));assert.ok(data.umpireBelow);distances.push(data);
 };
 try{
- await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語','English');
+ await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語/Language','English');
  assert.equal(await page.locator('html').getAttribute('lang'),'en');await english();
  await page.getByRole('button',{name:'Set up a new match',exact:true}).click();await english();
  await choose('Scoring rules','Custom');await page.getByLabel('Target score',{exact:true}).fill('1');await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('The change-of-ends score must be below the target score.',{exact:true}).waitFor();await english();
@@ -36,7 +36,7 @@ try{
  await page.getByRole('button',{name:'Match history',exact:true}).click();await page.locator('.history-item').first().waitFor();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Help & install app',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
  await page.getByRole('button',{name:'Settings',exact:true}).click();await page.getByRole('button',{name:'Edit match settings',exact:true}).click();await english();await page.getByRole('button',{name:'Close',exact:true}).click();
- await page.getByRole('button',{name:'Settings',exact:true}).click();await choose('Language','日本語');await page.getByRole('button',{name:'閉じる',exact:true}).click();
+ await page.getByRole('button',{name:'Settings',exact:true}).click();await choose('言語/Language','日本語');await page.getByRole('button',{name:'閉じる',exact:true}).click();
  assert.equal(await page.locator('html').getAttribute('lang'),'ja');assert.equal(await page.locator('.court-section h2').textContent(),'コート');assert.equal(await page.getByText('審判から見た配置',{exact:true}).count(),0);
  await page.getByRole('dialog').waitFor({state:'hidden'});await page.screenshot({path:'outputs/japanese-court.png',fullPage:true});
  assert.deepEqual(errors,[]);const result={checks:['English settings before match','English setup and validation errors','English match/history/help/name editing','language retained on reload and offline','language change preserves score and names','Japanese switch back','court heading and role labels simplified','arrow anchored to actual card edges','umpire fixed'],distances,errors};console.log(JSON.stringify(result,null,2));await writeFile('outputs/language-results.json',JSON.stringify(result,null,2));

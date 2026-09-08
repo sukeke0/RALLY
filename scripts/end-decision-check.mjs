@@ -15,7 +15,7 @@ function fixture(team,rule){
 }
 try{
  for(const rule of [RULE_15,RULE_21])for(const [language,team,answer] of [['ja','A','Yes'],['en','B','No']]){
-  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+  const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).waitFor();
   await page.evaluate(({match,language})=>new Promise((resolve,reject)=>{

@@ -184,7 +184,7 @@
   "対": "vs",
   "勝利": "Winner",
   "言語設定を保存できませんでした。": "Could not save the language preference.",
-  "言語": "Language",
+  "言語/Language": "言語/Language",
   "15点制プリセット：15点・2点差・上限21点。大会の要項に合わせて、開始前にルールを確認してください。": "15-point preset: win by 2, capped at 21. Check the competition’s rules before starting.",
   "エンド交替の得点は、基本得点未満にしてください。": "The change-of-ends score must be below the target score.",
   "コートチェンジ": "Change ends",

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import { chromium } from 'playwright';
 const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
-const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
+const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const choose=async(label,value)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:value,exact:true}).click()};
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
@@ -30,7 +30,7 @@ try{
  await settings('ゲームセット');await choose('結果','引き分け');await page.getByRole('button',{name:'ゲームセットを確定',exact:true}).click();await saved();
  await page.getByRole('button',{name:'次のセットへ',exact:true}).click();await choose('最初にサーブするチーム','Team B');await page.getByRole('button',{name:'GAME 2 を開始',exact:true}).click();await saved();assert.equal(await page.locator('.server strong').textContent(),'Bob');
  await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();assert.equal(await page.locator('.score-card.team-a .score-number').textContent(),'2');assert.ok(await page.locator('.score-card.team-a').isEnabled());
- await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語','English');await page.getByRole('button',{name:'End game',exact:true}).click();
+ await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語/Language','English');await page.getByRole('button',{name:'End game',exact:true}).click();
  assert.ok(!/[\u3040-\u30ff\u3400-\u9fff]/.test(await page.getByRole('dialog').innerText()));await choose('What to end','Entire match');await choose('Result','Draw');await page.getByRole('button',{name:'Confirm ending',exact:true}).click();await page.getByText('Saved on device',{exact:true}).waitFor();await noDialog();await page.screenshot({path:'outputs/game-set-english.png',fullPage:true});assert.match(await page.locator('.result-strip').innerText(),/Match over/);
  await page.getByRole('button',{name:'Match history',exact:true}).click();await page.locator('.history-item').first().waitFor();assert.match(await page.locator('.history-item').innerText(),/Time limit/);
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'Export current match',exact:true}).click();const download=await downloadPromise;await download.saveAs('outputs/corrected-match.json');await page.locator('input[type=file]').setInputFiles('outputs/corrected-match.json');await page.getByText('Saved 1 matches as copies.',{exact:true}).waitFor();assert.equal(await page.locator('.history-item').count(),2);

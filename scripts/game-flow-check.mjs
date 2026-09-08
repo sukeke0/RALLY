@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
-const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true});
 const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
 const add=async t=>{await page.getByRole('button',{name:new RegExp(`Team ${t}に1点追加`)}).click();await saved();};
@@ -58,7 +58,7 @@ try{
  await page.getByRole('button',{name:'試合履歴',exact:true}).click();await page.locator('.history-item').first().waitFor();assert.equal(await page.locator('.history-item').count(),1);
  const downloadPromise=page.waitForEvent('download');await page.getByRole('button',{name:'全試合を書き出す',exact:true}).click();const download=await downloadPromise;await download.saveAs('outputs/test-export.json');
  await page.locator('input[type=file]').setInputFiles('outputs/test-export.json');await page.getByText('1件の試合をコピーとして保存しました。',{exact:true}).waitFor();assert.equal(await page.locator('.history-item').count(),2);
- await page.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語','English');await page.getByRole('button',{name:'Set up a new match',exact:true}).click();
+ await page.getByRole('button',{name:'閉じる',exact:true}).click();await page.getByRole('button',{name:'設定',exact:true}).click();await choose('言語/Language','English');await page.getByRole('button',{name:'Set up a new match',exact:true}).click();
  await page.getByText('Starting a new match deletes the current match and its rally history. This cannot be undone.',{exact:true}).waitFor();assert.deepEqual(await page.getByRole('dialog').locator('.actions button').allTextContents(),['OK','Cancel']);await page.getByRole('button',{name:'OK',exact:true}).click();await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('Saved on device',{exact:true}).waitFor();await page.getByRole('dialog').waitFor({state:'hidden'});
  assert.ok(await page.getByRole('button',{name:'Back',exact:true}).isDisabled());assert.ok(await page.getByRole('button',{name:'Forward',exact:true}).isDisabled());
  await page.getByRole('button',{name:'Match history',exact:true}).click();await page.locator('.history-item').first().waitFor();assert.equal(await page.locator('.history-item').count(),2);

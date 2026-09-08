@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir,writeFile } from 'node:fs/promises';
 import { chromium } from 'playwright';
 const browser=await chromium.launch({headless:true,channel:process.env.RALLY_BROWSER_CHANNEL});
-const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
 const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
 const add=async t=>{await page.getByRole('button',{name:new RegExp(`Team ${t}に1点追加`)}).click();await saved();};

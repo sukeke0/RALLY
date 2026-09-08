@@ -16,7 +16,7 @@ const fixtures=[{match:completed,rows:[[14,21],[22,20],[19,21]],totals:[1,2],lan
  {match:nextGame(forcedGame,'A1','B1',now),rows:[[0,4],[0,0]],totals:[0,1],language:'ja',name:'forced-resumed'}];
 const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
 try{for(const fixture of fixtures){
- const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const context=await browser.newContext({locale:'ja-JP',viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).waitFor();assert.ok(await page.locator('.game-summary').isDisabled());
  await page.evaluate(({match,language})=>new Promise((resolve,reject)=>{localStorage.setItem('rally-language',language);const req=indexedDB.open('rally-scoreboard-v1',1);req.onsuccess=()=>{const db=req.result,tx=db.transaction(['matches','meta'],'readwrite');tx.objectStore('matches').put(match);tx.objectStore('meta').put({matchId:match.matchId},'active');tx.oncomplete=()=>{db.close();resolve()};tx.onabort=()=>reject(tx.error)};req.onerror=()=>reject(req.error)}),fixture);
  await page.reload();await page.getByText(fixture.language==='ja'?'端末に保存済み':'Saved on device',{exact:true}).waitFor();

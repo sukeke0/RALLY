@@ -18,6 +18,20 @@ test('every static translation key in the UI has an English translation with mat
  const placeholders=(s:string)=>[...s.matchAll(/\{(\w+)\}/g)].map(x=>x[1]).sort();
  for(const [ja,en] of Object.entries(translations))assert.deepEqual(placeholders(ja),placeholders(en),ja);
 });
-test('language preference defaults to Japanese and tolerates unavailable storage',()=>{
- assert.equal(loadLanguage(),'ja');assert.equal(loadLanguage({getItem:()=> 'en'}),'en');assert.equal(loadLanguage({getItem:()=> 'invalid'}),'ja');assert.equal(loadLanguage({getItem:()=>{throw new Error('blocked')}}),'ja');
+test('first visit uses Japanese only for a Japanese browser language',()=>{
+ for(const locale of ['ja','ja-JP','JA-jp'])assert.equal(loadLanguage(undefined,locale),'ja');
+ for(const locale of ['en-US','en-GB','fr-FR','zh-CN','ko-KR','javanese',''])assert.equal(loadLanguage(undefined,locale),'en');
+ assert.equal(loadLanguage(),'en');
+});
+test('a saved language overrides the browser language',()=>{
+ assert.equal(loadLanguage({getItem:()=> 'en'},'ja-JP'),'en');
+ assert.equal(loadLanguage({getItem:()=> 'ja'},'en-US'),'ja');
+});
+test('missing, invalid and unavailable storage fall back to the browser language',()=>{
+ for(const locale of ['ja-JP','fr-FR']){
+  const expected=locale==='ja-JP'?'ja':'en';
+  assert.equal(loadLanguage({getItem:()=>null},locale),expected);
+  assert.equal(loadLanguage({getItem:()=> 'invalid'},locale),expected);
+  assert.equal(loadLanguage({getItem:()=>{throw new Error('blocked')}},locale),expected);
+ }
 });
