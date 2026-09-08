@@ -26,7 +26,7 @@ try{
  await page.reload();await saved();assert.equal(await page.locator('.team-a .team-name').textContent(),'ブルースター');assert.equal(await page.locator('.team-a .player-names').textContent(),'James / A2');
  assert.equal(await page.getByText('NEXT SERVE',{exact:true}).count(),0);assert.equal(await page.locator('.toolbar button').count(),2);assert.equal(await page.getByRole('button',{name:'表示反転',exact:true}).count(),0);
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'コートチェンジ',exact:true}).click();await page.getByRole('button',{name:'コートチェンジする',exact:true}).click();await saved();await umpire();
- await page.getByRole('button',{name:'確認',exact:true}).click();
+ assert.equal(await page.getByText('エンドを交替しました。得点カードも左右が変わります。',{exact:true}).count(),0);await page.reload();await saved();assert.equal(await page.getByText('エンドを交替しました。得点カードも左右が変わります。',{exact:true}).count(),0);
  assert.equal(await page.locator('.serve-arrow').getAttribute('marker-end'),'url(#serve-arrow-head)');
  const court=await page.locator('.court').boundingBox();const arrow=await page.locator('.serve-arrow').boundingBox();assert.ok(arrow.width>0&&arrow.x>court.x&&arrow.x+arrow.width<court.x+court.width);
  assert.equal(await page.locator('[data-slot=table-container]').evaluate(el=>el.scrollLeft),0);
