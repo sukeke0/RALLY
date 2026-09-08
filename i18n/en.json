@@ -1,4 +1,8 @@
 {
+  "コートチェンジしますか？": "Change ends?",
+  "GAME {game}：{points}点": "GAME {game}: {points} points",
+  "コートチェンジを選択してください。": "Choose whether to change ends.",
+  "コートチェンジの確認はありません。": "There is no pending end-change confirmation.",
   "コート": "Court",
   "サーブ": "Server",
   "レシーブ": "Receiver",

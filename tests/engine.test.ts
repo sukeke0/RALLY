@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createMatch, currentState, scorePoint, undoPoint, nextGame, courtPositions, changeEnds, currentGame } from '../domain/engine.ts';
+import { createMatch, currentState, scorePoint, undoPoint, nextGame, courtPositions, changeEnds, currentGame, decideEnds } from '../domain/engine.ts';
 import { RULE_21, RULE_15 } from '../domain/rules.ts';
 import type { Match, MatchType, Team, Rule } from '../domain/model.ts';
 import { MatchStore } from '../state/match-store.ts';
@@ -41,14 +41,15 @@ test('deuce requires margin; cap wins by one',()=>{
 test('15 point preset and custom rule are not fixed to 21',()=>{
  assert.equal(currentState(run(start('singles',RULE_15),Array(15).fill('B'))).winner,'B');
  const rule={...RULE_21,target:5,cap:7,gamesToWin:1,interval:{...RULE_21.interval,at:3},ends:{...RULE_21.ends,decidingGameAt:3}};
- assert.equal(run(start('doubles',rule),Array(5).fill('A')).status,'completed');
+ const pending=run(start('doubles',rule),Array(3).fill('A'));
+ assert.equal(run(decideEnds(pending,true,now),['A','A']).status,'completed');
 });
 test('next game winner serves, reselect players, exchange ends',()=>{
  const m=run(start(),Array(21).fill('A'));const next=nextGame(m,'A2','B2',now),s=currentState(next);assert.equal(s.server,'A2');assert.equal(s.receiver,'B2');assert.deepEqual(s.score,{A:0,B:0});assert.equal(s.teamASide,'right');assert.deepEqual(s.court.A,{right:'A2',left:'A1'});assert.throws(()=>nextGame(m,'B1','A1',now));
  const u=undoPoint(next,now);assert.equal(u.games.length,1);assert.equal(currentState(u).score.A,20);assert.equal(currentState(u).server,'A1');
 });
-test('deciding game ends change exactly once and Undo reverses it',()=>{
- let m=run(start(),Array(21).fill('A'));m=nextGame(m,'A1','B1',now);m=run(m,Array(21).fill('B'));m=nextGame(m,'B2','A2',now);m=run(m,Array(10).fill('B'));const before=currentState(m);m=scorePoint(m,'B',now);const s=currentState(m);assert.notEqual(s.teamASide,before.teamASide);assert.equal(s.server,before.server);assert.equal(s.receiver,'A1');assert.equal(s.endChanged,true);assert.deepEqual(currentState(undoPoint(m,now)),before);assert.equal(currentState(scorePoint(m,'B',now)).teamASide,s.teamASide);
+test('legacy deciding game automatic ends remain compatible and Undo reverses it',()=>{
+ let m=run(start(),Array(21).fill('A'));m=nextGame(m,'A1','B1',now);m=run(m,Array(21).fill('B'));m=nextGame(m,'B2','A2',now);m=run(m,Array(10).fill('B'));const before=currentState(m);m=scorePoint(m,'B',now,false);const s=currentState(m);assert.notEqual(s.teamASide,before.teamASide);assert.equal(s.server,before.server);assert.equal(s.receiver,'A1');assert.equal(s.endChanged,true);assert.deepEqual(currentState(undoPoint(m,now)),before);assert.equal(currentState(scorePoint(m,'B',now)).teamASide,s.teamASide);
 });
 test('view flip leaves match untouched, real ends affect geometry only',()=>{
  const m=run(start(),['A','B','B']),before=structuredClone(m),s=currentState(m);const p=courtPositions(m,s),q=courtPositions(m,s,true);assert.deepEqual(m,before);p.forEach((v,i)=>{assert.equal(v.x+q[i].x,100);assert.equal(v.y+q[i].y,100);});const end=currentState(changeEnds(m,now));assert.equal(end.server,s.server);assert.equal(end.receiver,s.receiver);assert.deepEqual(end.court,s.court);assert.notEqual(end.teamASide,s.teamASide);

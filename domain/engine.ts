@@ -33,7 +33,7 @@ export function initialState(game: Game): GameState {
     receiver: game.initialReceiver, serviceCourt: 'right', court: copy(game.initialCourtState),
     teamASide: game.initialTeamASide, endChanged: false, intervalReached: false, winner: null };
 }
-export function advance(state: GameState, winner: Team, rule: Rule, decidingGame: boolean, type: Match['matchType']): GameState {
+export function advance(state: GameState, winner: Team, rule: Rule, decidingGame: boolean, type: Match['matchType'], automaticEnds = true): GameState {
   if (state.finished) throw new Error('このゲームは終了しています。');
   const next = copy(state);
   next.score[winner]++;
@@ -48,7 +48,7 @@ export function advance(state: GameState, winner: Team, rule: Rule, decidingGame
   next.finished = next.winner !== null;
   const high = Math.max(next.score.A, next.score.B);
   if (rule.interval.at !== null && high >= rule.interval.at) next.intervalReached = true;
-  if (decidingGame && !next.endChanged && rule.ends.decidingGameAt !== null && high >= rule.ends.decidingGameAt) {
+  if (automaticEnds && decidingGame && !next.endChanged && rule.ends.decidingGameAt !== null && high >= rule.ends.decidingGameAt) {
     next.teamASide = opposite(next.teamASide);
     next.endChanged = true;
   }
@@ -59,7 +59,11 @@ export function replayGame(match: Pick<Match,'rule'|'matchType'>, game: Game): G
   const applyEnds = (count: number) => { for (const event of game.endChanges) if (event.afterRally === count) state.teamASide = opposite(state.teamASide); };
   applyEnds(0);
   for (const rally of game.rallyHistory) {
-    state = advance(state,rally.winner,match.rule,game.gameNumber === match.rule.gamesToWin * 2 - 1,match.matchType);
+    state = advance(state,rally.winner,match.rule,game.gameNumber === match.rule.gamesToWin * 2 - 1,match.matchType,!game.decidingEnd);
+    if (game.decidingEnd?.afterRally === rally.rallyNumber && game.decidingEnd.change !== null) {
+      if (game.decidingEnd.change) state.teamASide = opposite(state.teamASide);
+      state.endChanged = true;
+    }
     applyEnds(rally.rallyNumber);
   }
   if (game.ending) { state.finished = true; state.winner = game.ending.winner; }
@@ -67,6 +71,15 @@ export function replayGame(match: Pick<Match,'rule'|'matchType'>, game: Game): G
 }
 export const currentGame = (match: Match): Game => match.games[match.games.length - 1];
 export const currentState = (match: Match): GameState => replayGame(match,currentGame(match));
+export const needsEndDecision = (match: Match): boolean => currentGame(match).decidingEnd?.change === null && !currentState(match).finished;
+export function decideEnds(match: Match, change: boolean, now: string): Match {
+  if (!needsEndDecision(match) || typeof change !== 'boolean') throw new Error('コートチェンジの確認はありません。');
+  const next = copy(match);
+  currentGame(next).decidingEnd!.change = change;
+  currentGame(next).decidingEnd!.timestamp = now;
+  next.updatedAt = now;
+  return next;
+}
 export function gamesWon(match: Match): Record<Team,number> {
   return match.games.reduce((count,game) => { if(game.winner) count[game.winner]++; return count; },{A:0,B:0});
 }
@@ -87,15 +100,20 @@ function finalize(match: Match, now: string): Match {
   match.updatedAt = now;
   return match;
 }
-export function scorePoint(match: Match, winner: Team, now: string): Match {
+export function scorePoint(match: Match, winner: Team, now: string, confirmEnds = true): Match {
   if (winner !== 'A' && winner !== 'B') throw new Error('得点するチームが不正です。');
   const before = currentState(match);
   if (match.status === 'completed' || before.finished) throw new Error('ゲームは終了しています。');
+  if (needsEndDecision(match)) throw new Error('コートチェンジを選択してください。');
   const next = copy(match), game = currentGame(next);
   const after = advance(before,winner,match.rule,game.gameNumber === match.rule.gamesToWin*2-1,match.matchType);
   game.rallyHistory.push({ rallyNumber: game.rallyHistory.length+1, winner, scoreAfter: after.score,
     serverBefore: before.server, receiverBefore: before.receiver, courtStateBefore: copy(before.court),
     teamASideBefore: before.teamASide, timestamp: now });
+  const threshold = match.rule.ends.decidingGameAt;
+  if (confirmEnds && !game.decidingEnd && !before.endChanged && !after.finished && game.gameNumber === match.rule.gamesToWin*2-1 && threshold !== null && Math.max(after.score.A,after.score.B) >= threshold) {
+    game.decidingEnd = {afterRally:game.rallyHistory.length,change:null,timestamp:now};
+  }
   return finalize(next,now);
 }
 export function undoPoint(match: Match, now: string): Match {
@@ -105,6 +123,7 @@ export function undoPoint(match: Match, now: string): Match {
   if (game.ending) { delete game.ending; return finalize(next,now); }
   if (!game.rallyHistory.length) return match;
   game.rallyHistory.pop();
+  if (game.decidingEnd && game.decidingEnd.afterRally > game.rallyHistory.length) delete game.decidingEnd;
   game.endChanges = game.endChanges.filter(event => event.afterRally <= game.rallyHistory.length);
   return finalize(next,now);
 }
@@ -118,6 +137,7 @@ export function nextGame(match: Match, server: PlayerId, receiver: PlayerId, now
   return next;
 }
 export function changeEnds(match: Match, now: string): Match {
+  if (needsEndDecision(match)) throw new Error('コートチェンジを選択してください。');
   if (currentState(match).finished) throw new Error('次ゲーム開始時にエンドを交替します。');
   const next = copy(match), game = currentGame(next);
   game.endChanges.push({afterRally:game.rallyHistory.length,timestamp:now});

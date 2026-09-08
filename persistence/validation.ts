@@ -1,5 +1,5 @@
 import type { Match, PlayerId, Team } from '../domain/model.ts';
-import { createMatch, currentState, nextGame, scorePoint, changeEnds, endGame } from '../domain/engine.ts';
+import { createMatch, currentGame, currentState, nextGame, scorePoint, changeEnds, decideEnds, endGame } from '../domain/engine.ts';
 import { validateRule } from '../domain/rules.ts';
 const ids=['A1','A2','B1','B2'];
 const fail=():never=>{throw new Error('試合データの形式または得点履歴が正しくありません。');};
@@ -18,6 +18,7 @@ export function validateMatch(value: unknown): Match {
   let built=createMatch({matchType:m.matchType,players:m.players,teamNames:m.teamNames,rule:m.rule,servingTeam:first.initialServingTeam,server:first.initialServer,receiver:first.initialReceiver,teamASide:first.initialTeamASide},m.matchId,m.createdAt);
   for(let i=0;i<m.games.length;i++){
    const g=m.games[i];
+   if(g.decidingEnd!==undefined && (!g.decidingEnd || !Number.isInteger(g.decidingEnd.afterRally) || ![null,true,false].includes(g.decidingEnd.change) || !date(g.decidingEnd.timestamp)))fail();
    if(!ids.includes(g.initialServer)||!ids.includes(g.initialReceiver)||!['left','right'].includes(g.initialTeamASide)||!['A','B'].includes(g.initialServingTeam)||g.gameNumber!==i+1||!Array.isArray(g.rallyHistory)||g.rallyHistory.length>m.rule.cap*2-1||!Array.isArray(g.endChanges)||g.endChanges.length>1000)fail();
    if(i>0)built=nextGame(built,g.initialServer,g.initialReceiver,m.updatedAt);
    const original=built.games[i];
@@ -29,10 +30,13 @@ export function validateMatch(value: unknown): Match {
    for(let j=0;j<g.rallyHistory.length;j++){
     const r=g.rallyHistory[j],s=currentState(built);
     if(r.rallyNumber!==j+1||!['A','B'].includes(r.winner)||!date(r.timestamp)||r.serverBefore!==s.server||r.receiverBefore!==s.receiver||r.teamASideBefore!==s.teamASide||!same(r.courtStateBefore,s.court))fail();
-    built=scorePoint(built,r.winner as Team,r.timestamp);
+    built=scorePoint(built,r.winner as Team,r.timestamp,g.decidingEnd!==undefined);
     if(!same(r.scoreAfter,currentState(built).score))fail();
+    if(g.decidingEnd?.afterRally===j+1 && g.decidingEnd.change!==null)built=decideEnds(built,g.decidingEnd.change,g.decidingEnd.timestamp);
     ends(j+1);
    }
+   const decision=currentGame(built).decidingEnd;
+   if(g.decidingEnd && (!decision || decision.afterRally!==g.decidingEnd.afterRally || decision.change!==g.decidingEnd.change || decision.timestamp!==g.decidingEnd.timestamp))fail();
    if(g.ending!==undefined){
     if(!g.ending || typeof g.ending!=='object' || !date(g.ending.timestamp) || Object.keys(g.ending).sort().join(',')!=='reason,scope,timestamp,winner')fail();
     built=endGame(built,g.ending);

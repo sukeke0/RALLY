@@ -37,6 +37,7 @@ export function useMatch(){
  async function redo(){await guarded(async()=>{if(!store.current?.canRedo)return;await persist(store.current.redo(new Date().toISOString()),{...prefsRef.current});});}
  async function next(server:PlayerId,receiver:PlayerId){await guarded(async()=>{if(!store.current)return;await persist(store.current.next(server,receiver,new Date().toISOString()),{...prefsRef.current});});}
  async function ends(){await guarded(async()=>{if(!store.current)return;await persist(store.current.ends(new Date().toISOString()),prefsRef.current);});}
+ async function decideEnds(change:boolean){await guarded(async()=>{if(!store.current)return;if(saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');await persist(store.current.decideEnds(change,new Date().toISOString()),prefsRef.current);});}
  async function open(saved:Match){await guarded(async()=>{if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');store.current=new MatchStore(saved);await persist(saved,{matchId:saved.matchId});});}
  async function retry(){await guarded(async()=>{if(store.current)await persist(store.current.match,prefsRef.current);else{const result=await repo.load();if(result){store.current=new MatchStore(result.match);setMatch(result.match);prefsRef.current=result.prefs;setPrefs(result.prefs);}setSaveStatus('saved');setError('');}});}
  async function rename(names:ParticipantNames){await guarded(async()=>{if(!store.current)throw new Error('試合を開始してください。');await persist(store.current.rename(names,new Date().toISOString()),prefsRef.current);});}
@@ -48,7 +49,7 @@ export function useMatch(){
   if(store.current?.match.matchId===matchId){store.current=null;prefsRef.current={matchId:''};setPrefs(prefsRef.current);setMatch(null);setError('');setSaveStatus('saved');}
   else setSaveStatus(previousStatus);
  });}
- return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,open,retry,rename,revise,finish,remove,
+ return {match,prefs,saveStatus,error,writable,repo,start,score,undo,redo,next,ends,decideEnds,open,retry,rename,revise,finish,remove,
   canUndo:store.current?.canUndo??false,canRedo:store.current?.canRedo??false,
   read:()=>store.current?{matchId:store.current.match.matchId,game:store.current.match.games.length,...currentState(store.current.match),status:store.current.match.status}:null};
 }

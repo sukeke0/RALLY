@@ -1,5 +1,5 @@
 import type {Match,MatchSetup,PlayerId,Team} from './model.ts';
-import {createMatch,currentState,scorePoint,nextGame,changeEnds,endGame} from './engine.ts';
+import {createMatch,currentState,scorePoint,nextGame,changeEnds,endGame,needsEndDecision,decideEnds} from './engine.ts';
 
 // Replay rally winners rather than copying derived service order from the old rules.
 export function reviseMatch(match:Match,setup:MatchSetup,now:string):Match {
@@ -16,7 +16,9 @@ export function reviseMatch(match:Match,setup:MatchSetup,now:string):Match {
   ends(0);
   for(const rally of game.rallyHistory){
    if(currentState(revised).finished || revised.status==='completed')throw new Error('変更後のルールでは、記録済みの得点より前にゲームが終了します。');
-   revised=scorePoint(revised,rally.winner,rally.timestamp);ends(rally.rallyNumber);
+   revised=scorePoint(revised,rally.winner,rally.timestamp,game.decidingEnd!==undefined);
+   if(needsEndDecision(revised) && game.decidingEnd && game.decidingEnd.change!==null)revised=decideEnds(revised,game.decidingEnd.change,game.decidingEnd.timestamp);
+   ends(rally.rallyNumber);
   }
   if(game.ending){
    if(revised.status==='completed'||(currentState(revised).finished&&game.ending.scope==='game'))throw new Error('変更後のルールと途中終了の記録が矛盾します。先に「戻る」で途中終了を取り消してください。');

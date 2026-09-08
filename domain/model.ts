@@ -45,6 +45,8 @@ export interface Rally {
   timestamp: string;
 }
 export interface Game {
+  // Absent in older matches, which used automatic deciding-game end changes.
+  decidingEnd?: { afterRally: number; change: boolean | null; timestamp: string };
   ending?: GameEnding;
   gameNumber: number;
   initialServingTeam: Team;
