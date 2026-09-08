@@ -9,6 +9,7 @@ import { RULE_15 } from '../domain/rules';
 import { useMatch } from '../state/use-match';
 import { ScoreCards } from '../ui/score-cards';
 import { ScoreSheet } from '../ui/score-sheet';
+import { MatchSummary } from '../ui/match-summary';
 import { Court } from '../ui/court';
 import { Setup,NextGameSetup } from '../ui/setup';
 import { MatchHistory,downloadMatches } from '../ui/history';
@@ -16,7 +17,7 @@ import { Dialog,DialogClose,DialogContent,DialogTitle,DialogDescription } from '
 import { usePwa } from '../pwa/use-pwa';
 import { registerScoreTools } from '../pwa/webmcp';
 const blank=createMatch({matchType:'doubles',players:{A1:'',A2:'',B1:'',B2:''},rule:RULE_15,servingTeam:'A',server:'A1',receiver:'B1',teamASide:'left'},'not-started','2026-09-07T00:00:00Z');
-type Panel='edit'|'finish'|'setup'|'setup-warning'|'settings'|'history'|'help'|'next'|'ends'|null;
+type Panel='edit'|'finish'|'setup'|'setup-warning'|'settings'|'history'|'help'|'next'|'ends'|'summary'|null;
 export default function Home(){
  const {t,language,setLanguage,languageError}=useI18n();
 
@@ -28,7 +29,7 @@ export default function Home(){
  const pendingEnds=!!session.match&&needsEndDecision(match);
  const openSetup=()=>setPanel(session.match?'setup-warning':'setup');
  const run=(action:()=>Promise<void>)=>{setActionError('');void action().catch(e=>setActionError((e as Error).message));};
- const titles={edit:t("試合設定を変更"),finish:t("ゲームセット"),setup:t("新しい試合"),'setup-warning':t("新しい試合"),settings:t("試合と表示の設定"),history:t("試合履歴"),help:t("RALLYの使い方"),next:t('GAME {game} の準備',{game:game.gameNumber+1}),ends:t("コートチェンジ")};
+ const titles={summary:t('試合状況'),edit:t("試合設定を変更"),finish:t("ゲームセット"),setup:t("新しい試合"),'setup-warning':t("新しい試合"),settings:t("試合と表示の設定"),history:t("試合履歴"),help:t("RALLYの使い方"),next:t('GAME {game} の準備',{game:game.gameNumber+1}),ends:t("コートチェンジ")};
  return <div className="app-shell"><header className="app-header"><a className="brand" href="/" aria-label={t("RALLY ホーム")}><span className="brand-mark">R</span><span>RALLY<span className="brand-sub">BADMINTON SCOREBOARD</span></span></a><div className="header-actions"><span className={`local-status ${session.saveStatus==='error'?'failed':''}`} role="status"><i/>{session.saveStatus==='loading'?t("読込中"):session.saveStatus==='saving'?t("保存中"):session.saveStatus==='error'?t("未保存"):session.match?t("端末に保存済み"):t("新しい試合")}</span><button className="icon-button" aria-label={t("試合履歴")} title={t("試合履歴")} disabled={locked} onClick={()=>setPanel('history')}><History/></button><button className="icon-button" aria-label={t("設定")} title={t("設定")} disabled={locked} onClick={()=>setPanel('settings')}><Settings2/></button></div></header>
  <main className="board">
  {!session.writable&&<div className="notice" role="status">{t("別のタブで操作中です。そのタブを閉じて、こちらを再読み込みしてください。")}</div>}
@@ -37,14 +38,15 @@ export default function Home(){
  {actionError&&!session.error&&<div className="error-message" role="alert">{t(actionError)}<button onClick={()=>setActionError('')} className="text-button">{t("閉じる")}</button></div>}
  <div className="match-bar"><div className="game-label">GAME <strong>{game.gameNumber.toString().padStart(2,'0')}</strong><span className="live-pill"><i/>{!session.match?t("開始前"):match.status==='completed'?t("試合終了"):state.finished?t("セット終了"):t("試合中")}</span></div><span className="rule-caption">{match.matchType==='doubles'?t("ダブルス"):t("シングルス")} <b>·</b> {t('{target}点 / {games}ゲーム先取',{target:match.rule.target,games:match.rule.gamesToWin})}</span></div>
  {state.finished&&<div className={`result-strip ${match.status==='completed'?'':'next-set'}`} role="status">{match.status==='completed'&&<div><strong>{t('試合終了')}</strong></div>}<button className="primary-button" disabled={locked} onClick={()=>match.status==='completed'?openSetup():setPanel('next')}>{match.status==='completed'?t("新しい試合"):t("次のセットへ")}</button></div>}
- <ScoreCards match={match} state={state} disabled={!session.match||locked||pendingEnds||session.saveStatus==='error'} onScore={team=>run(()=>session.score(team))}/>
+ <ScoreCards match={match} state={state} onSummary={()=>setPanel('summary')} summaryDisabled={!session.match||pendingEnds} disabled={!session.match||locked||pendingEnds||session.saveStatus==='error'} onScore={team=>run(()=>session.score(team))}/>
  <ScoreSheet match={match}/><Court match={match} state={state}/>
  <div className="toolbar"><button className="undo-button" title={t("直前の得点を取り消す")} disabled={!session.canUndo||locked} onClick={()=>{run(session.undo)}}><ArrowLeft/>{t("戻る")}</button><button className="undo-button" title={t("取り消した得点をやり直す")} disabled={!session.canRedo||locked} onClick={()=>run(session.redo)}>{t("進む")}<ArrowRight/></button></div>
  <footer className="board-footer"><button onClick={()=>setPanel('help')}><CircleHelp size={15}/>{t("サービス位置は選手から見た左右")}</button><span className="device-status">{!pwa.online?<WifiOff size={13}/>:pwa.offlineReady?<Check size={13}/>:null}{pwa.wakeLocked&&<Sun size={13}/>}</span></footer>
  </main>
  <Dialog open={pendingEnds} onOpenChange={()=>{}}><DialogContent className="modal" showCloseButton={false}><DialogTitle>{t('コートチェンジしますか？')}</DialogTitle><DialogDescription>{t('GAME {game}：{points}点',{game:game.gameNumber,points:match.rule.ends.decidingGameAt??11})}</DialogDescription>{session.error&&<div className="error-message" role="alert">{t(session.error)}<button onClick={()=>run(session.retry)}>{t('保存を再試行')}</button></div>}<div className="actions"><button className="primary-button" disabled={locked||session.saveStatus==='error'} onClick={()=>run(()=>session.decideEnds(true))}>Yes</button><button className="secondary-button" disabled={locked||session.saveStatus==='error'} onClick={()=>run(()=>session.decideEnds(false))}>No</button></div></DialogContent></Dialog>
- <Dialog open={panel!==null&&!pendingEnds} onOpenChange={open=>{if(!open)setPanel(null)}}><DialogContent className="modal" showCloseButton={false}><DialogClose render={<button className="modal-close icon-button" aria-label={t("閉じる")}/> }><X/></DialogClose><DialogTitle>{panel?titles[panel]:''}</DialogTitle>{!['settings','help','ends'].includes(panel??'')&&<DialogDescription>{panel==='setup-warning'?t('新しい試合を開始すると、現在の試合と得点履歴は削除されます。元に戻せません。'):panel==='edit'?t('現在の試合の設定を修正します。'):panel==='finish'?t('棄権や時間切れなどによる途中終了を記録します。'):panel==='setup'?t("開始後は得点した側をタップするだけ。"):panel==='history'?t("この端末に保存された試合を確認・再開できます。"):panel==='next'?t("サーバーとレシーバーを確認してください。"):null}</DialogDescription>}
+ <Dialog open={panel!==null&&!pendingEnds} onOpenChange={open=>{if(!open)setPanel(null)}}><DialogContent className="modal" showCloseButton={false}><DialogClose render={<button className="modal-close icon-button" aria-label={t("閉じる")}/> }><X/></DialogClose><DialogTitle>{panel?titles[panel]:''}</DialogTitle>{!['settings','help','ends','summary'].includes(panel??'')&&<DialogDescription>{panel==='setup-warning'?t('新しい試合を開始すると、現在の試合と得点履歴は削除されます。元に戻せません。'):panel==='edit'?t('現在の試合の設定を修正します。'):panel==='finish'?t('棄権や時間切れなどによる途中終了を記録します。'):panel==='setup'?t("開始後は得点した側をタップするだけ。"):panel==='history'?t("この端末に保存された試合を確認・再開できます。"):panel==='next'?t("サーバーとレシーバーを確認してください。"):null}</DialogDescription>}
  {panel==='setup'&&<Setup previous={session.match??undefined} onStart={async setup=>{await session.start(setup);setPanel(null)}}/>}
+ {panel==='summary'&&<MatchSummary match={match}/>}
  {panel==='setup-warning'&&<div className="actions setup-warning-actions"><button className="primary-button" disabled={locked} onClick={()=>setPanel('setup')}>OK</button><button className="secondary-button" onClick={()=>setPanel(null)}>{t('キャンセル')}</button></div>}
  {panel==='edit'&&<Setup key="edit" previous={match} editing onStart={async setup=>{await session.revise(setup);setPanel(null)}}/>}
  {panel==='finish'&&<GameSet match={match} onFinish={async ending=>{await session.finish(ending);setPanel(null)}}/>}
