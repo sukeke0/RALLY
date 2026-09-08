@@ -1,8 +1,7 @@
-import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 import {createMatch,nextGame,scorePoint,needsEndDecision,decideEnds,changeEnds,endGame} from '../domain/engine.ts';
 import {RULE_21} from '../domain/rules.ts';
-const {chromium}=createRequire(process.env.RALLY_NODE_MODULES+'/runtime.cjs')('playwright');
+import { chromium } from 'playwright';
 const now='2026-09-08T05:00:00.000Z';
 const points=(match,team,n)=>{for(let i=0;i<n;i++){match=scorePoint(match,team,now);if(needsEndDecision(match))match=decideEnds(match,false,now);}return match;};
 let m=createMatch({matchType:'doubles',players:{A1:'John',A2:'James',B1:'Bob',B2:'Ben'},teamNames:{A:'Team A',B:'Team B'},rule:RULE_21,servingTeam:'A',server:'A1',receiver:'B1',teamASide:'left'},'summary-fixture',now);
@@ -15,7 +14,7 @@ const fixtures=[{match:completed,rows:[[14,21],[22,20],[19,21]],totals:[1,2],lan
  {match:endGame(progress,{scope:'match',reason:'time-limit',winner:null,timestamp:now}),rows:[[14,21],[22,20],[10,8]],totals:[1,1],language:'en',name:'time-limit'},
  {match:forcedGame,rows:[[4,0]],totals:[1,0],language:'ja',name:'forced-game'},
  {match:nextGame(forcedGame,'A1','B1',now),rows:[[0,4],[0,0]],totals:[0,1],language:'ja',name:'forced-resumed'}];
-const browser=await chromium.launch({channel:'msedge',headless:true});
+const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
 try{for(const fixture of fixtures){
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).waitFor();assert.ok(await page.locator('.game-summary').isDisabled());

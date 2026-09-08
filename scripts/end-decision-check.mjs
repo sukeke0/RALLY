@@ -1,10 +1,8 @@
-import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 import {createMatch,nextGame,scorePoint} from '../domain/engine.ts';
 import {RULE_21,RULE_15} from '../domain/rules.ts';
-const require=createRequire(process.env.RALLY_NODE_MODULES+'/runtime.cjs');
-const {chromium}=require('playwright');
-const browser=await chromium.launch({channel:'msedge',headless:true});
+import { chromium } from 'playwright';
+const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
 const now='2026-09-08T04:00:00.000Z';
 function fixture(team,rule){
  let m=createMatch({matchType:'doubles',players:{A1:'John',A2:'James',B1:'Bob',B2:'Ben'},rule,servingTeam:'A',server:'A1',receiver:'B1',teamASide:'left'},crypto.randomUUID(),now);

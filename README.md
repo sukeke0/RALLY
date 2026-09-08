@@ -9,14 +9,50 @@ BADMINTON SCOREBOARD
 Node.js 22.13以上、pnpmを使用します。
 
 ```sh
-pnpm install
-pnpm dev
-pnpm test
+git clone https://github.com/sukeke0/RALLY.git
+cd RALLY
+pnpm install --frozen-lockfile
 pnpm build
 pnpm start
 ```
 
+ビルドすると、公開用のHTML・CSS・JavaScript・Service Workerが `dist/` に生成されます。公開先にはこのフォルダの内容を配置します。開発中は `pnpm dev`、自動テストは `pnpm test` を使用します。
+
 開発時はService Workerを登録しません。PWAを確認する際は`pnpm build`後の`pnpm start`を使います。ホーム画面追加とWake LockはHTTPSまたはlocalhostで動作します。初回のキャッシュ完了後はオフライン起動・得点入力・保存ができます。
+
+## ソースと生成物
+
+このリポジトリには、アプリのソース、設定、画像素材、テスト、ビルド用スクリプトを保存します。
+
+| ファイル | 用途 | Git管理 |
+| --- | --- | --- |
+| `app/`、`domain/`、`ui/` など | アプリのソース | 含める |
+| `scripts/*.mjs` | Node.jsで実行するビルド・検証・画像生成のソース | 含める |
+| `public/` | アイコン画像とPWAの設定 | 含める |
+| `package.json`、`pnpm-lock.yaml` | 依存関係とその固定バージョン | 含める |
+| `dist/` | ビルドで生成する公開用ファイル（`sw.js`を含む） | 除外 |
+| `node_modules/` | インストールした依存ライブラリ | 除外 |
+| `outputs/`、`work/`、`*.tsbuildinfo` | 検証出力、一時ファイル、ビルド用キャッシュ | 除外 |
+
+`.mjs` はJavaScriptのモジュール形式を表す拡張子で、コンパイル済みであることを意味しません。例えば `scripts/build-sw.mjs` が生成する成果物は `dist/sw.js` です。`public/icons/` のPNGは配布用の画像素材として保存しており、変更する場合は `node scripts/make-icons.mjs` で再生成できます。
+
+## ブラウザ検証（任意）
+
+通常のビルドと `pnpm test` にブラウザのインストールは不要です。画面操作の検証には次の準備を行います。
+
+```sh
+pnpm exec playwright install chromium
+pnpm build
+pnpm start --port 4180 --strictPort
+```
+
+プレビューを起動したまま、別のターミナルで実行します。
+
+```sh
+node --experimental-strip-types scripts/browser-check.mjs
+```
+
+他の `scripts/*-check.mjs` も同じ方法で実行できます。各検証は独立したブラウザ環境を使い、出力は `outputs/` に保存します。標準ではPlaywrightのChromiumを使います。インストール済みのMicrosoft Edgeを使う場合は、環境変数 `RALLY_BROWSER_CHANNEL` を `msedge` に設定してください。
 
 ## 技術選定
 

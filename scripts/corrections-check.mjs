@@ -1,9 +1,7 @@
-import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
-const require=createRequire(process.env.RALLY_NODE_MODULES?process.env.RALLY_NODE_MODULES+'/runtime.cjs':import.meta.url);
-const {chromium}=require('playwright');
-const browser=await chromium.launch({channel:'msedge',headless:true});
+import { chromium } from 'playwright';
+const browser=await chromium.launch({channel:process.env.RALLY_BROWSER_CHANNEL,headless:true});
 const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage();
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const choose=async(label,value)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:value,exact:true}).click()};
