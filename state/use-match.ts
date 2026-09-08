@@ -26,7 +26,14 @@ export function useMatch(){
   catch{setSaveStatus('error');setError('端末に保存できませんでした。現在の得点は画面に残っています。再試行するか、JSONを書き出してください。');throw new Error('端末に保存できませんでした。');}
  }
  async function guarded(action:()=>Promise<void>){if(!writable)throw new Error('別のタブで試合を開いています。');if(busy.current)throw new Error('保存中です。');busy.current=true;try{await action();}finally{busy.current=false;}}
- async function start(setup:MatchSetup){await guarded(async()=>{if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');const m=createMatch(setup,crypto.randomUUID(),new Date().toISOString());store.current=new MatchStore(m);await persist(m,{matchId:m.matchId});void navigator.storage?.persist?.().catch(()=>{});});}
+ async function start(setup:MatchSetup){await guarded(async()=>{
+  if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');
+  const m=createMatch(setup,crypto.randomUUID(),new Date().toISOString()),nextPrefs={matchId:m.matchId},previousStatus=saveStatus;
+  setSaveStatus('saving');
+  try{await repo.save(m,nextPrefs,store.current?.match.matchId)}catch{setSaveStatus(previousStatus);throw new Error('新しい試合を保存できませんでした。現在の試合は保持されています。');}
+  store.current=new MatchStore(m);prefsRef.current=nextPrefs;setPrefs(nextPrefs);setMatch(m);setError('');setSaveStatus('saved');
+  void navigator.storage?.persist?.().catch(()=>{});
+ });}
  async function score(team:Team){await guarded(async()=>{
   if(!store.current||saveStatus==='error')throw new Error('試合を開始してください。');
   const next=store.current.score(team,new Date().toISOString());

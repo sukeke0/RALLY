@@ -47,3 +47,21 @@ test('deleting the active match clears its pointer atomically and remains delete
  await repo.save(active,{matchId:active.matchId});await repo.import([other]);await repo.remove(active.matchId);await repo.close();
  const reopened=new MatchRepository(dbName);assert.equal(await reopened.load(),null);assert.deepEqual(await reopened.list(),[other]);await reopened.remove(active.matchId);assert.deepEqual(await reopened.list(),[other]);await reopened.close();
 });
+
+test('starting a replacement deletes only the current match and persists the new active match',async()=>{
+ const repo=new MatchRepository(crypto.randomUUID()),active=scorePoint(make(),'A',now),other=make(),next=make();
+ await repo.save(active,{matchId:active.matchId});await repo.import([other]);
+ await repo.save(next,{matchId:next.matchId},active.matchId);
+ assert.deepEqual((await repo.load())?.match,next);
+ assert.deepEqual(new Set((await repo.list()).map(m=>m.matchId)),new Set([next.matchId,other.matchId]));await repo.close();
+});
+
+test('replacement failure rolls back deletion, new match and active pointer together',async()=>{
+ const repo=new MatchRepository(crypto.randomUUID()),active=scorePoint(make(),'B',now),next=make();
+ await repo.save(active,{matchId:active.matchId});
+ const original=IDBObjectStore.prototype.put;
+ IDBObjectStore.prototype.put=function(value:unknown,key?:IDBValidKey){const req=original.call(this,value,key);if(this.name==='matches')req.addEventListener('success',()=>this.transaction.abort(),{once:true});return req;};
+ try{await assert.rejects(repo.save(next,{matchId:next.matchId},active.matchId));}finally{IDBObjectStore.prototype.put=original;}
+ assert.deepEqual((await repo.load())?.match,active);assert.deepEqual(await repo.list(),[active]);
+ await repo.save(next,{matchId:next.matchId},active.matchId);assert.deepEqual(await repo.list(),[next]);await repo.close();
+});

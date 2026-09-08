@@ -7,10 +7,14 @@ const browser=await chromium.launch({channel:'msedge',headless:true}),context=aw
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
 const choose=async(label,value)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:value,exact:true}).click()};
-const start=async name=>{await page.getByLabel('チームAの名前',{exact:true}).fill(name);await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();await page.locator('.score-card.team-a').click();await saved()};
+const start=async name=>{await page.getByLabel('チームAの名前',{exact:true}).fill(name);await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();if(name==='Current A')await page.getByRole('button',{name:'破棄して新しい試合を開始',exact:true}).click();await saved();await page.locator('.score-card.team-a').click();await saved()};
 try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).click();await start('Archived A');
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'ゲームセット',exact:true}).click();await choose('終了する範囲','試合全体を終了');await choose('結果','Archived A の勝利');await page.getByRole('button',{name:'ゲームセットを確定',exact:true}).click();await saved();
+ // Keep an imported historical copy; starting the next match discards the active original.
+ await page.getByRole('button',{name:'試合履歴',exact:true}).click();await page.locator('.history-item').waitFor();
+ const exported=page.waitForEvent('download');await page.getByRole('button',{name:'現在の試合を書き出す',exact:true}).click();await (await exported).saveAs('outputs/delete-history-fixture.json');
+ await page.locator('input[type=file]').setInputFiles('outputs/delete-history-fixture.json');await page.getByText('1件の試合をコピーとして保存しました。',{exact:true}).waitFor();await page.getByRole('button',{name:'閉じる',exact:true}).click();
  await page.getByRole('button',{name:'新しい試合',exact:true}).click();await start('Current A');await page.getByRole('button',{name:'試合履歴',exact:true}).click();await page.locator('.history-item').first().waitFor();assert.equal(await page.locator('.history-item').count(),2);
  const archived=page.locator('.history-item').filter({hasText:'Archived A'});await archived.getByRole('button',{name:'削除',exact:true}).click();await page.getByRole('button',{name:'キャンセル',exact:true}).click();assert.equal(await page.locator('.history-item').count(),2);
  await archived.getByRole('button',{name:'削除',exact:true}).click();await mkdir('outputs',{recursive:true});await page.screenshot({path:'outputs/delete-match-confirm.png',fullPage:true});

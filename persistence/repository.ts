@@ -18,8 +18,9 @@ export class MatchRepository {
   });
   return this.dbPromise;
  }
- async save(match:Match,prefs:Preferences):Promise<void>{
+ async save(match:Match,prefs:Preferences,discardMatchId?:string):Promise<void>{
   const db=await this.open(),tx=db.transaction(['matches','meta'],'readwrite'),finished=done(tx);
+  if(discardMatchId && discardMatchId!==match.matchId)tx.objectStore('matches').delete(discardMatchId);
   tx.objectStore('matches').put(structuredClone(match));tx.objectStore('meta').put(structuredClone(prefs),'active');await finished;
  }
  async load():Promise<{match:Match;prefs:Preferences}|null>{

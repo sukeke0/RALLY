@@ -1,4 +1,7 @@
 {
+  "新しい試合を開始すると、現在の試合と得点履歴は削除されます。元に戻せません。": "Starting a new match deletes the current match and its rally history. This cannot be undone.",
+  "破棄して新しい試合を開始": "Discard and start new match",
+  "新しい試合を保存できませんでした。現在の試合は保持されています。": "Could not save the new match. The current match has been kept.",
   "コートチェンジしますか？": "Change ends?",
   "GAME {game}：{points}点": "GAME {game}: {points} points",
   "コートチェンジを選択してください。": "Choose whether to change ends.",
