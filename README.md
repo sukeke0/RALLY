@@ -1,101 +1,35 @@
-# RALLY — バドミントン審判スコアボード
+# RALLY
 
-スマートフォン縦画面用のPWA。得点した側のカードをタップすると、スコア・サービス順・各選手のサービスコート担当が更新されます。試合データはIndexedDBに自動保存され、外部バックエンドへ送信しません。
+A mobile-first badminton scoreboard PWA for umpires. Tap to score, track service order and court positions, and undo mistakes. Supports singles and doubles, Japanese and English, offline use, and local match history with JSON import/export.
 
-<img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/e4ae0e19-68bc-4436-8c74-4592cfa0e0d7" />
+<img width="600" height="600" alt="RALLY badminton scoreboard" src="https://github.com/user-attachments/assets/e4ae0e19-68bc-4436-8c74-4592cfa0e0d7" />
 
-## 実行
+## Development
 
-Node.js 22.13以上、pnpmを使用します。
+Requires Node.js 22.13+ and pnpm.
 
 ```sh
 git clone https://github.com/sukeke0/RALLY.git
 cd RALLY
 pnpm install --frozen-lockfile
+pnpm dev
+```
+
+## Build
+
+```sh
 pnpm build
 pnpm start
 ```
 
-ビルドすると、公開用のHTML・CSS・JavaScript・Service Workerが `dist/` に生成されます。公開先にはこのフォルダの内容を配置します。開発中は `pnpm dev`、自動テストは `pnpm test` を使用します。
+Deploy the contents of `dist/` at the root of an HTTPS site. Offline support is enabled in production builds after the first successful load. Match data stays in the browser.
 
-開発時はService Workerを登録しません。PWAを確認する際は`pnpm build`後の`pnpm start`を使います。ホーム画面追加とWake LockはHTTPSまたはlocalhostで動作します。初回のキャッシュ完了後はオフライン起動・得点入力・保存ができます。
-
-## ソースと生成物
-
-このリポジトリには、アプリのソース、設定、画像素材、テスト、ビルド用スクリプトを保存します。
-
-| ファイル | 用途 | Git管理 |
-| --- | --- | --- |
-| `app/`、`domain/`、`ui/` など | アプリのソース | 含める |
-| `scripts/*.mjs` | Node.jsで実行するビルド・検証・画像生成のソース | 含める |
-| `public/` | アイコン画像とPWAの設定 | 含める |
-| `package.json`、`pnpm-lock.yaml` | 依存関係とその固定バージョン | 含める |
-| `dist/` | ビルドで生成する公開用ファイル（`sw.js`を含む） | 除外 |
-| `node_modules/` | インストールした依存ライブラリ | 除外 |
-| `outputs/`、`work/`、`*.tsbuildinfo` | 検証出力、一時ファイル、ビルド用キャッシュ | 除外 |
-
-`.mjs` はJavaScriptのモジュール形式を表す拡張子で、コンパイル済みであることを意味しません。例えば `scripts/build-sw.mjs` が生成する成果物は `dist/sw.js` です。`public/icons/` のPNGは配布用の画像素材として保存しており、変更する場合は `node scripts/make-icons.mjs` で再生成できます。
-
-## ブラウザ検証（任意）
-
-通常のビルドと `pnpm test` にブラウザのインストールは不要です。画面操作の検証には次の準備を行います。
+## Tests
 
 ```sh
-pnpm exec playwright install chromium
-pnpm build
-pnpm start --port 4180 --strictPort
+pnpm test
 ```
 
-プレビューを起動したまま、別のターミナルで実行します。
+## License
 
-```sh
-node --experimental-strip-types scripts/browser-check.mjs
-```
-
-他の `scripts/*-check.mjs` も同じ方法で実行できます。各検証は独立したブラウザ環境を使い、出力は `outputs/` に保存します。標準ではPlaywrightのChromiumを使います。インストール済みのMicrosoft Edgeを使う場合は、環境変数 `RALLY_BROWSER_CHANNEL` を `msedge` に設定してください。
-
-## 技術選定
-
-TypeScript + Vite + React。Sitesの標準構成とアクセシブルな既存UI部品を再利用し、端末だけで動く静的SPAにしています。Reactは表示レイヤーだけに使用し、サービス順はフレームワークに依存しない純粋関数です。外部フォント、CDN、ログイン機能、アプリ用バックエンドはありません。Sitesの限定公開ページにはホスティング側のアクセス制御が適用されます。
-
-## ディレクトリ構成
-
-- `domain/model.ts` — Match / Game / Rally / Rule / GameState
-- `domain/rules.ts` — 21点・15点プリセット、カスタム設定検証、終了判定
-- `domain/engine.ts` — 得点、サービス順、履歴再生、ゲーム遷移、コート座標変換
-- `state/match-store.ts` — Undo / Redoの操作管理
-- `state/use-match.ts` — UIと保存の連携、同一ブラウザの多重タブ操作防止
-- `persistence/` — IndexedDB、JSON形式、履歴を再計算するインポート検証
-- `ui/` — 得点カード、得点表、コート、設定、試合履歴
-- `i18n/` — 日本語／英語の表示と端末ごとの言語設定
-- `pwa/` — Wake Lock、Service Worker登録、任意のWebMCP連携
-- `public/` — manifestと各サイズのアイコン
-- `scripts/build-sw.mjs` — 完成したアプリからキャッシュ対象とバージョンを生成
-- `tests/` — Nodeの標準テストランナーによるドメイン・保存の検証
-- `docs/` — データ構造・状態遷移・検証記録
-
-## 使い方
-
-1. 「試合を設定」で種目・ルール・選手名・サーバー・レシーバー・Team Aの初期エンドを決めます。空欄の名前はA1等になります。
-2. ラリー終了時に得点側のカードをタップします。カード全体がボタンです。
-3. 「戻る」で履歴・配置・ゲーム状態も戻ります。「進む」で取り消した得点をやり直せます。
-4. ゲーム終了で入力を停止します。「次のセットへ」で最初のサーバーとレシーバーを選び直せます。
-5. 設定の「試合設定を変更」で、チーム名・選手名も変更できます。
-6. ヘッダーの履歴から、過去の試合を再開・確認・JSON書き出しできます。JSONの読み込みはコピーとして追加します。
-   各試合の「削除」から確認して履歴を削除できます。現在表示中の試合を削除すると、開始前の画面に戻ります。
-7. 設定の「言語/Language」で日本語／Englishを切り替えます。初回はブラウザの優先言語が日本語なら日本語、それ以外なら英語で表示します。手動の選択は端末に保存して次回以降も優先し、試合データや入力した名前は維持されます。
-8. 「試合設定を変更」で種目・ルール・第1ゲーム開始時のサービスと配置を修正できます。得点履歴は保持して再計算し、既存のゲーム進行と矛盾する変更は保存しません。
-9. 「ゲームセット」でこのゲームだけ／試合全体の途中終了を選び、棄権・時間切れ・その他の理由と結果を記録できます。得点はそのまま保存し、「戻る」で終了だけを取り消せます。
-
-21点制は21点 / 2点差 / 上限30点 / 2ゲーム先取です。15点制は15点 / 2点差 / 上限21点 / 2ゲーム先取です。大会要項に合わせて開始前に確認してください。
-
-## 運用上の留意点
-
-- エンド交替では得点カードも移動します。チーム名・選手名を確認して得点してください。
-- コート図はサービスコートの担当を示し、ラリー中の実際の立ち位置を指定しません。
-- 設定の「コートチェンジ」で実際のコート交替を記録します。審判は常に中央下側に表示します。
-- 保存失敗時は加点を止め、再試行とJSON書き出しを案内します。
-- ブラウザのサイトデータ削除やOSによる容量整理に備え、必要な記録はJSONで保管してください。
-- PWAの更新は次回起動時に反映します。試合中に新しいService Workerへ強制切り替えしません。
-- 端末ごとのホーム画面追加UI、Wake Lock、OSによるキャッシュ管理には差があります。
-
+[MIT](LICENSE)
