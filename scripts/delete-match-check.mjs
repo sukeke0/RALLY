@@ -7,7 +7,7 @@ const browser=await chromium.launch({channel:'msedge',headless:true}),context=aw
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const saved=()=>page.getByText('端末に保存済み',{exact:true}).waitFor();
 const choose=async(label,value)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:value,exact:true}).click()};
-const start=async name=>{await page.getByLabel('チームAの名前',{exact:true}).fill(name);await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();if(name==='Current A')await page.getByRole('button',{name:'破棄して新しい試合を開始',exact:true}).click();await saved();await page.locator('.score-card.team-a').click();await saved()};
+const start=async name=>{if(name==='Current A')await page.getByRole('button',{name:'OK',exact:true}).click();await page.getByLabel('チームAの名前',{exact:true}).fill(name);await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();await page.locator('.score-card.team-a').click();await saved()};
 try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).click();await start('Archived A');
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'ゲームセット',exact:true}).click();await choose('終了する範囲','試合全体を終了');await choose('結果','Archived A の勝利');await page.getByRole('button',{name:'ゲームセットを確定',exact:true}).click();await saved();
