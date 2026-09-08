@@ -26,7 +26,7 @@ try{
  assert.equal(await page.locator('html').getAttribute('lang'),'en');await english();
  await page.getByRole('button',{name:'Set up a new match',exact:true}).click();await english();
  await choose('Scoring rules','Custom');await page.getByLabel('Target score',{exact:true}).fill('1');await page.getByRole('button',{name:'Start match',exact:true}).click();await page.getByText('The change-of-ends score must be below the target score.',{exact:true}).waitFor();await english();
- await choose('Scoring rules','21 points');await page.getByLabel('A1',{exact:true}).fill('John');await page.getByLabel('B1',{exact:true}).fill('Bob');await page.getByRole('button',{name:'Start match',exact:true}).click();await saved();
+ await choose('Scoring rules','21 points');await page.getByLabel('A1 player name',{exact:true}).fill('John');await page.getByLabel('B1 player name',{exact:true}).fill('Bob');await page.getByRole('button',{name:'Start match',exact:true}).click();await saved();
  await english();assert.equal(await page.locator('.court-section h2').textContent(),'Court');
  assert.equal(await page.locator('.court-player.partner .court-role').allTextContents().then(x=>x.join('')),'');
  await checkArrow();await add('a');await checkArrow();await add('b');await checkArrow();

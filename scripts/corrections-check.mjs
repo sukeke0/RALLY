@@ -14,7 +14,7 @@ const noDialog=()=>page.getByRole('dialog').waitFor({state:'hidden'});
 try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).click();
  await choose('得点ルール','21点制');
- await page.getByLabel('A1',{exact:true}).fill('John');await page.getByLabel('B1',{exact:true}).fill('Bob');await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
+ await page.getByLabel('A1 選手名',{exact:true}).fill('John');await page.getByLabel('B1 選手名',{exact:true}).fill('Bob');await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
  await add('a');await add('a');await add('b');
  await settings('試合設定を変更');assert.equal(await page.getByRole('combobox',{name:'得点ルール',exact:true}).textContent(),'21点制▼');
  await choose('得点ルール','15点制');await choose('最初のサーバー','A2');await choose('最初のレシーバー','B2');

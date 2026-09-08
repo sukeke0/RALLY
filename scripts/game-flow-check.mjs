@@ -13,7 +13,7 @@ try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).click();
  assert.equal(await page.getByRole('combobox',{name:'得点ルール',exact:true}).textContent(),'15点制▼');
  await choose('得点ルール','21点制');
- await page.getByLabel('A1',{exact:true}).fill('田中');await page.getByLabel('B2',{exact:true}).fill('伊藤');
+ await page.getByLabel('A1 選手名',{exact:true}).fill('田中');await page.getByLabel('B2 選手名',{exact:true}).fill('伊藤');
  await choose('最初のサーバー','A2');await choose('最初のレシーバー','伊藤');
  await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player.server strong').textContent(),'A2');assert.equal(await page.locator('.court-player.receiver strong').textContent(),'伊藤');
