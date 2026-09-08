@@ -5,7 +5,7 @@ import { createMatch,currentState,currentGame,needsEndDecision } from '../domain
 import {GameSet} from '../ui/game-set';
 import {Choice} from '../ui/choice';
 import type {Language} from '../i18n/messages';
-import { RULE_21 } from '../domain/rules';
+import { RULE_15 } from '../domain/rules';
 import { useMatch } from '../state/use-match';
 import { ScoreCards } from '../ui/score-cards';
 import { ScoreSheet } from '../ui/score-sheet';
@@ -15,7 +15,7 @@ import { MatchHistory,downloadMatches } from '../ui/history';
 import { Dialog,DialogClose,DialogContent,DialogTitle,DialogDescription } from '../components/ui/dialog';
 import { usePwa } from '../pwa/use-pwa';
 import { registerScoreTools } from '../pwa/webmcp';
-const blank=createMatch({matchType:'doubles',players:{A1:'',A2:'',B1:'',B2:''},rule:RULE_21,servingTeam:'A',server:'A1',receiver:'B1',teamASide:'left'},'not-started','2026-09-07T00:00:00Z');
+const blank=createMatch({matchType:'doubles',players:{A1:'',A2:'',B1:'',B2:''},rule:RULE_15,servingTeam:'A',server:'A1',receiver:'B1',teamASide:'left'},'not-started','2026-09-07T00:00:00Z');
 type Panel='edit'|'finish'|'setup'|'settings'|'history'|'help'|'next'|'ends'|null;
 export default function Home(){
  const {t,language,setLanguage,languageError}=useI18n();

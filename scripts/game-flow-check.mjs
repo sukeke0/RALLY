@@ -11,6 +11,8 @@ const add=async t=>{await page.getByRole('button',{name:new RegExp(`Team ${t}に
 const choose=async(label,text)=>{await page.getByRole('combobox',{name:label,exact:true}).click();await page.getByRole('option',{name:text,exact:true}).click();};
 try{
  await page.goto('http://127.0.0.1:4180/');await page.getByRole('button',{name:'試合を設定',exact:true}).click();
+ assert.equal(await page.getByRole('combobox',{name:'得点ルール',exact:true}).textContent(),'15点制▼');
+ await choose('得点ルール','21点制');
  await page.getByLabel('A1',{exact:true}).fill('田中');await page.getByLabel('B2',{exact:true}).fill('伊藤');
  await choose('最初のサーバー','A2');await choose('最初のレシーバー','伊藤');
  await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
@@ -36,7 +38,7 @@ try{
  await page.getByRole('button',{name:'戻る',exact:true}).click();await saved();
  assert.equal(await page.locator('.score-card.team-a .score-number').textContent(),'20');assert.equal(await page.locator('.court-player.server strong').textContent(),'A2');
  await page.getByRole('button',{name:'設定',exact:true}).click();await page.getByRole('button',{name:'新しい試合を設定',exact:true}).click();
- await choose('種目','シングルス');await choose('得点ルール','15点制');
+ await choose('種目','シングルス');assert.equal(await page.getByRole('combobox',{name:'得点ルール',exact:true}).textContent(),'15点制▼');
  await page.getByRole('button',{name:'この設定で試合を開始',exact:true}).click();await saved();
  assert.equal(await page.locator('.court-player').count(),2);
  for(let i=0;i<8;i++)await add('B');for(let i=0;i<7;i++)await add('B');
