@@ -1,8 +1,8 @@
 # RALLY — バドミントン審判スコアボード
 
-BADMINTON SCOREBOARD
-
 スマートフォン縦画面用のPWA。得点した側のカードをタップすると、スコア・サービス順・各選手のサービスコート担当が更新されます。試合データはIndexedDBに自動保存され、外部バックエンドへ送信しません。
+
+<img width="600" height="600" alt="image" src="https://github.com/user-attachments/assets/e4ae0e19-68bc-4436-8c74-4592cfa0e0d7" />
 
 ## 実行
 
@@ -62,6 +62,4 @@ TypeScript + Vite + React。Sitesの標準構成とアクセシブルな既存UI
 - ブラウザのサイトデータ削除やOSによる容量整理に備え、必要な記録はJSONで保管してください。
 - PWAの更新は次回起動時に反映します。試合中に新しいService Workerへ強制切り替えしません。
 - 端末ごとのホーム画面追加UI、Wake Lock、OSによるキャッシュ管理には差があります。
-
-初期版ではトーナメント表・分析・クラウド同期を実装していません。
 
