@@ -1,6 +1,6 @@
 import { useEffect,useRef,useState } from 'react';
 import type { GameEnding,Match,MatchSetup,PlayerId,Team } from '../domain/model';
-import { createMatch,currentState } from '../domain/engine';
+import { createMatch,currentState,hasRecordedResult } from '../domain/engine';
 import { MatchRepository,type Preferences } from '../persistence/repository';
 import { MatchStore } from './match-store';
 import type { ParticipantNames } from '../domain/participants';
@@ -30,7 +30,8 @@ export function useMatch(){
   if(store.current&&saveStatus==='error')throw new Error('現在の試合の保存を再試行してください。');
   const m=createMatch(setup,crypto.randomUUID(),new Date().toISOString()),nextPrefs={matchId:m.matchId},previousStatus=saveStatus;
   setSaveStatus('saving');
-  try{await repo.save(m,nextPrefs,store.current?.match.matchId)}catch{setSaveStatus(previousStatus);throw new Error('新しい試合を保存できませんでした。現在の試合は保持されています。');}
+  const previous=store.current?.match,discardMatchId=previous&&!hasRecordedResult(previous)?previous.matchId:undefined;
+  try{await repo.save(m,nextPrefs,discardMatchId)}catch{setSaveStatus(previousStatus);throw new Error('新しい試合を保存できませんでした。現在の試合は保持されています。');}
   store.current=new MatchStore(m);prefsRef.current=nextPrefs;setPrefs(nextPrefs);setMatch(m);setError('');setSaveStatus('saved');
   void navigator.storage?.persist?.().catch(()=>{});
  });}

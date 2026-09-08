@@ -71,6 +71,7 @@ export function replayGame(match: Pick<Match,'rule'|'matchType'>, game: Game): G
 }
 export const currentGame = (match: Match): Game => match.games[match.games.length - 1];
 export const currentState = (match: Match): GameState => replayGame(match,currentGame(match));
+export const hasRecordedResult = (match: Match): boolean => match.status === 'completed' || match.games.some(game => game.ending !== undefined);
 export const needsEndDecision = (match: Match): boolean => currentGame(match).decidingEnd?.change === null && !currentState(match).finished;
 export function decideEnds(match: Match, change: boolean, now: string): Match {
   if (!needsEndDecision(match) || typeof change !== 'boolean') throw new Error('コートチェンジの確認はありません。');

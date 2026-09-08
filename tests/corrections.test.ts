@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import type {Match,MatchSetup,GameEnding} from '../domain/model.ts';
-import {createMatch,currentGame,currentState,scorePoint,nextGame,endGame,changeEnds} from '../domain/engine.ts';
+import {createMatch,currentGame,currentState,scorePoint,nextGame,endGame,changeEnds,hasRecordedResult,undoPoint} from '../domain/engine.ts';
 import {reviseMatch} from '../domain/revise.ts';
 import {RULE_21,RULE_15} from '../domain/rules.ts';
 import {MatchStore} from '../state/match-store.ts';
@@ -11,6 +11,14 @@ const setup:MatchSetup={matchType:'doubles',players:{A1:'John',A2:'James',B1:'Bo
 const make=()=>createMatch(setup,'correction-test',now);
 const score=(m:Match,team:'A'|'B',count:number)=>{for(let i=0;i<count;i++)m=scorePoint(m,team,now);return m};
 const ending=(overrides:Partial<GameEnding>={}):GameEnding=>({scope:'game',reason:'time-limit',winner:'A',timestamp:now,...overrides});
+
+test('completed matches and forced endings are retained when starting another match',()=>{
+ const active=score(make(),'A',4);assert.equal(hasRecordedResult(active),false);
+ const firstFinished=score(make(),'A',21);assert.equal(hasRecordedResult(firstFinished),false);
+ const completed=score(nextGame(firstFinished,'A1','B1',now),'A',21);assert.equal(hasRecordedResult(completed),true);
+ for(const scope of ['game','match'] as const){const forced=endGame(active,ending({scope}));assert.equal(hasRecordedResult(forced),true);assert.equal(hasRecordedResult(undoPoint(forced,now)),false);}
+ const forcedGame=endGame(active,ending());assert.equal(hasRecordedResult(nextGame(forcedGame,'A1','B1',now)),true);
+});
 test('settings correction preserves rally winners and dates while recalculating service and sides',()=>{
  let m=score(make(),'A',2);m=scorePoint(m,'B',now);m=changeEnds(m,now);const original=structuredClone(m);
  const revised=reviseMatch(m,{...setup,rule:RULE_15,server:'A2',receiver:'B2',teamASide:'right'},now);

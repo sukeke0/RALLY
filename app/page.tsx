@@ -1,7 +1,7 @@
 import {useI18n} from '../i18n/context';
 import { useEffect,useRef,useState } from 'react';
 import { X,Flag,History,Settings2,ArrowLeft,ArrowRight,CircleHelp,Download,Plus,Check,WifiOff,Sun,RotateCw } from 'lucide-react';
-import { createMatch,currentState,currentGame,needsEndDecision } from '../domain/engine';
+import { createMatch,currentState,currentGame,needsEndDecision,hasRecordedResult } from '../domain/engine';
 import {GameSet} from '../ui/game-set';
 import {Choice} from '../ui/choice';
 import type {Language} from '../i18n/messages';
@@ -27,7 +27,7 @@ export default function Home(){
  useEffect(()=>registerScoreTools({read:()=>actions.current.read(),score:async team=>{await actions.current.score(team);await new Promise(requestAnimationFrame);return actions.current.read();},undo:async()=>{await actions.current.undo();await new Promise(requestAnimationFrame);return actions.current.read();}}),[]);
  const locked=session.saveStatus==='loading'||session.saveStatus==='saving'||!session.writable;
  const pendingEnds=!!session.match&&needsEndDecision(match);
- const openSetup=()=>setPanel(session.match?'setup-warning':'setup');
+ const openSetup=()=>setPanel(session.match&&!hasRecordedResult(session.match)?'setup-warning':'setup');
  const run=(action:()=>Promise<void>)=>{setActionError('');void action().catch(e=>setActionError((e as Error).message));};
  const titles={summary:t('試合状況'),edit:t("試合設定を変更"),finish:t("ゲームセット"),setup:t("新しい試合"),'setup-warning':t("新しい試合"),settings:t("試合と表示の設定"),history:t("試合履歴"),help:t("RALLYの使い方"),next:t('GAME {game} の準備',{game:game.gameNumber+1}),ends:t("コートチェンジ")};
  return <div className="app-shell"><header className="app-header"><a className="brand" href="/" aria-label={t("RALLY ホーム")}><span className="brand-mark">R</span><span>RALLY<span className="brand-sub">BADMINTON SCOREBOARD</span></span></a><div className="header-actions"><span className={`local-status ${session.saveStatus==='error'?'failed':''}`} role="status"><i/>{session.saveStatus==='loading'?t("読込中"):session.saveStatus==='saving'?t("保存中"):session.saveStatus==='error'?t("未保存"):session.match?t("端末に保存済み"):t("新しい試合")}</span><button className="icon-button" aria-label={t("試合履歴")} title={t("試合履歴")} disabled={locked} onClick={()=>setPanel('history')}><History/></button><button className="icon-button" aria-label={t("設定")} title={t("設定")} disabled={locked} onClick={()=>setPanel('settings')}><Settings2/></button></div></header>
