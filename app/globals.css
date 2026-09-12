@@ -4,6 +4,7 @@
 @source '../app';
 @source '../ui';
 @source '../components/ui/dialog.tsx';
+@source '../components/ui/accordion.tsx';
 @source '../components/ui/button.tsx';
 @source '../components/ui/select.tsx';
 @source '../components/ui/checkbox.tsx';
@@ -45,3 +46,5 @@
 button.game-summary{width:100%;padding:0;border:0;background:transparent;border-radius:8px}button.game-summary:disabled{cursor:default}
 .match-summary-status{text-align:center;color:#587363;font-size:14px;margin:2px 0 16px}.match-score-head,.match-score-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) minmax(0,1fr)}.match-score-head{align-items:center;border-top:2px solid #385448;border-bottom:2px solid #385448;padding:12px 0;gap:4px}.match-score-head>span{text-align:center;font-size:14px;overflow-wrap:anywhere}.match-score-head b{display:block;font-size:12px;margin-bottom:3px;color:#698071}.match-score-head>span:nth-child(2){font-size:16px;letter-spacing:3px}.match-score-grid{border-bottom:2px solid #385448;min-height:130px}.match-game-total{display:grid;place-items:center;font-size:clamp(38px,10vw,60px);font-weight:600;color:#991d39;font-variant-numeric:tabular-nums;line-height:1}.match-set-scores{border-left:2px dotted #708076;border-right:2px dotted #708076;padding:10px 8px;display:grid;gap:14px}.match-set-row{text-align:center}.match-set-label{font-size:12px;letter-spacing:.5px;color:#748277;display:flex;justify-content:center;align-items:center;gap:6px;margin-bottom:3px}.match-set-label>span{font-size:11px;letter-spacing:0;color:#365b26;background:#e6efd9;padding:2px 5px;border-radius:5px}.match-set-points{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:5px;font-size:clamp(24px,7vw,38px);font-variant-numeric:tabular-nums;color:#991d39;line-height:1.2}.match-set-points strong{font-weight:600}.match-set-points>span{font-size:22px;font-weight:400;color:#67726b}.match-set-ending{display:block;color:#748277;font-size:12px;margin-top:4px}
 .setup-form-actions{display:flex;justify-content:flex-end;margin-top:8px}.setup-form-actions>button{min-height:44px}
+
+.settings-list>.oss-license-link{border:0;background:transparent;color:#65796c;font-size:14px;text-align:left;text-decoration:underline;min-height:44px;padding:10px 0}.oss-licenses [data-slot=accordion-trigger]{font-size:14px;min-height:44px;overflow-wrap:anywhere}.oss-licenses small{display:block;font-size:12px;font-weight:400;color:#65796c;margin-top:4px}.oss-licenses pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.6;font-family:ui-monospace,monospace;margin:0;padding:12px;background:#f1f5ef;border-radius:8px}

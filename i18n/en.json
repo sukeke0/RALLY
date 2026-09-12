@@ -232,5 +232,8 @@
   "この試合を削除": "Delete this match",
   "削除中…": "Deleting…",
   "試合を削除しました。": "Match deleted.",
-  "試合を削除できませんでした。もう一度お試しください。": "Could not delete the match. Please try again."
+  "試合を削除できませんでした。もう一度お試しください。": "Could not delete the match. Please try again.",
+  "OSSライセンス": "Open-source licenses",
+  "ライセンスを読み込めませんでした。": "Could not load licenses.",
+  "再試行": "Retry"
 }

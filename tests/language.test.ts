@@ -10,7 +10,7 @@ test('translation substitutes values without translating player names',()=>{
  assert.equal(translate('en','コート'),'Court');assert.equal(translate('ja','コート'),'コート');
 });
 test('every static translation key in the UI has an English translation with matching placeholders',()=>{
- const files=['app/page.tsx','ui/court.tsx','ui/score-cards.tsx','ui/score-sheet.tsx','ui/setup.tsx','ui/participant-editor.tsx','ui/history.tsx','ui/game-set.tsx','ui/match-summary.tsx'];
+ const files=['app/page.tsx','ui/court.tsx','ui/score-cards.tsx','ui/score-sheet.tsx','ui/setup.tsx','ui/participant-editor.tsx','ui/history.tsx','ui/game-set.tsx','ui/match-summary.tsx','ui/oss-licenses.tsx'];
  let count=0;for(const file of files){const sf=ts.createSourceFile(file,readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
   function check(node:ts.Node){if(ts.isCallExpression(node)&&node.expression.getText(sf)==='t'&&node.arguments[0]&&ts.isStringLiteral(node.arguments[0])){const key=node.arguments[0].text;assert.ok(translations[key],`Missing translation: ${key}`);count++;}ts.forEachChild(node,check)}check(sf);
  }
